@@ -4,8 +4,10 @@ namespace App\Services\Api;
 
 use App\Libs\File\Constants\FileType;
 use App\Libs\File\FileManager;
+use App\Libs\File\FileReferences;
 use App\Libs\File\UploadConfiguration;
 use App\Libs\Notifications\NotificationManager;
+use App\Models\Common\File;
 use App\Models\Member\User;
 use Illuminate\Auth\Events\Verified;
 use Illuminate\Contracts\Session\Session;
@@ -18,7 +20,7 @@ use Illuminate\Validation\ValidationException;
 
 class AuthService extends BaseService
 {
-    public function __construct(private readonly Session $session, private readonly FileManager $files, private readonly UploadConfiguration $uploads, private readonly NotificationManager $notifications) {}
+    public function __construct(private readonly Session $session, private readonly FileManager $files, private readonly UploadConfiguration $uploads, private readonly NotificationManager $notifications, private readonly FileReferences $fileReferences) {}
 
     public function register(array $validated): User
     {
@@ -118,14 +120,21 @@ class AuthService extends BaseService
 
     public function avatar(User $user, UploadedFile $uploaded): User
     {
-        $file = $this->files->store($uploaded, $this->uploads->publicDisk(), FileType::UserAvatar->value, 'public');
-        $url = $file->publicUrl();
-        if (! is_string($url) || $url === '') {
-            throw ValidationException::withMessages(['avatar' => __('common/file/const.no_public_storage')]);
-        }
-        $user->forceFill(['avatar_url' => mb_substr($url, 0, 512)])->save();
+        return DB::transaction(function () use ($user, $uploaded): User {
+            $oldFileId = $this->fileReferences->idsFromUrls($user->avatar_url)[0] ?? null;
+            $oldFile = $oldFileId === null ? null : File::find($oldFileId);
+            $file = $this->files->store($uploaded, $this->uploads->publicDisk(), FileType::UserAvatar->value, 'public');
+            $url = $file->publicUrl();
+            if (! is_string($url) || $url === '') {
+                throw ValidationException::withMessages(['avatar' => __('common/file/const.no_public_storage')]);
+            }
+            $user->forceFill(['avatar_url' => mb_substr($url, 0, 512)])->save();
+            if ($oldFile !== null && ! $oldFile->references()->exists()) {
+                $this->files->delete($oldFile);
+            }
 
-        return $user->fresh()->load('socialAccounts');
+            return $user->fresh()->load('socialAccounts');
+        });
     }
 
     public function logout(): void

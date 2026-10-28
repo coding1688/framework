@@ -8,6 +8,7 @@ return [
     'oauth_not_configured' => '이 외부 로그인 방식은 아직 설정되지 않았습니다.',
     'oauth_email_unverified' => '외부 서비스에서 인증된 이메일 주소가 필요합니다.',
     'oauth_already_linked' => '이미 연결된 외부 계정입니다.',
+    'oauth_account_exists' => '이 이메일로 가입된 계정이 이미 있습니다. 먼저 로그인한 후 프로필에서 외부 계정을 연결하세요.',
     'oauth_last_login' => '마지막 로그인 수단을 해제하기 전에 비밀번호를 설정하세요.',
     'password_reset_subject' => '계정 비밀번호 재설정',
     'password_reset_intro' => '비밀번호 재설정을 요청했습니다. 아래 버튼을 눌러 새 비밀번호를 설정하세요.',

@@ -2,11 +2,15 @@
 
 namespace Tests\Feature;
 
+use App\Libs\File\Constants\FileType;
 use App\Libs\File\FileManager;
 use App\Models\Admin\AdminDepartment;
 use App\Models\Admin\AdminLog;
 use App\Models\Admin\AdminUser;
 use App\Models\Common\File;
+use App\Models\Common\FileReference;
+use App\Models\Member\User;
+use App\Services\Api\AuthService;
 use Database\Seeders\backend\admin\AdminMenuSeeder;
 use Database\Seeders\backend\file\FileStorageSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -86,5 +90,53 @@ class FileManagerTest extends TestCase
         $this->assertDatabaseHas('files', ['path' => $path, 'created_by' => $actor->id]);
         $this->assertDatabaseHas('admin_logs', ['action' => 'file.item.upload', 'administrator_id' => $actor->id]);
         $this->assertSame(1, AdminLog::where('action', 'file.item.upload')->count());
+    }
+
+    public function test_avatar_replacement_syncs_references_and_deletes_the_unused_old_file(): void
+    {
+        $user = User::factory()->create();
+        $oldFile = $this->avatarFile($user);
+
+        $updated = app(AuthService::class)->avatar($user->fresh(), UploadedFile::fake()->create('new.jpg', 12, 'image/jpeg'));
+        $newFile = File::where('id', '!=', $oldFile->id)->sole();
+
+        $this->assertSame($newFile->publicUrl(), $updated->avatar_url);
+        Storage::disk('public')->assertMissing($oldFile->path);
+        Storage::disk('public')->assertExists($newFile->path);
+        $this->assertDatabaseMissing('files', ['id' => $oldFile->id]);
+        $this->assertDatabaseHas('file_references', ['file_id' => $newFile->id, 'reference_type' => User::class, 'reference_id' => $user->id, 'field' => 'avatar_url']);
+    }
+
+    public function test_avatar_replacement_preserves_an_old_file_that_is_still_referenced_elsewhere(): void
+    {
+        $user = User::factory()->create();
+        $oldFile = $this->avatarFile($user);
+        FileReference::create(['file_id' => $oldFile->id, 'reference_type' => 'shared', 'reference_id' => 1, 'field' => 'image']);
+
+        app(AuthService::class)->avatar($user->fresh(), UploadedFile::fake()->create('new.jpg', 12, 'image/jpeg'));
+
+        Storage::disk('public')->assertExists($oldFile->path);
+        $this->assertDatabaseHas('files', ['id' => $oldFile->id]);
+        $this->assertDatabaseMissing('file_references', ['file_id' => $oldFile->id, 'reference_type' => User::class, 'reference_id' => $user->id]);
+        $this->assertDatabaseHas('file_references', ['file_id' => $oldFile->id, 'reference_type' => 'shared', 'reference_id' => 1]);
+    }
+
+    public function test_reference_rebuild_uses_registered_owner_models(): void
+    {
+        $user = User::factory()->create();
+        $file = $this->avatarFile($user);
+        FileReference::where('reference_type', User::class)->where('reference_id', $user->id)->delete();
+
+        $this->artisan('files:rebuild-references')->assertSuccessful();
+
+        $this->assertDatabaseHas('file_references', ['file_id' => $file->id, 'reference_type' => User::class, 'reference_id' => $user->id, 'field' => 'avatar_url']);
+    }
+
+    private function avatarFile(User $user): File
+    {
+        $file = app(FileManager::class)->store(UploadedFile::fake()->create('old.jpg', 12, 'image/jpeg'), 'public', FileType::UserAvatar->value, 'public');
+        $user->forceFill(['avatar_url' => $file->publicUrl()])->save();
+
+        return $file;
     }
 }

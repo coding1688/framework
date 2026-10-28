@@ -10,7 +10,7 @@ class AdminUserSeeder extends Seeder
 {
     public function run(): void
     {
-        if (AdminUser::where('username', 'admin')->exists()) {
+        if (! app()->environment(['local', 'testing']) || AdminUser::where('username', 'admin')->exists()) {
             return;
         }
 

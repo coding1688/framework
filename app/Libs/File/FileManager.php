@@ -79,4 +79,19 @@ final class FileManager
 
         return $records;
     }
+
+    public function delete(File $file): void
+    {
+        DB::transaction(function () use ($file): void {
+            $model = File::lockForUpdate()->findOrFail($file->id);
+            if ($model->references()->exists()) {
+                throw ValidationException::withMessages(['file' => __('common/file/const.in_use')]);
+            }
+            foreach ($model->replicas as $replica) {
+                $this->storage->delete($replica->disk, $replica->path);
+            }
+            $this->storage->delete($model->disk, $model->path);
+            $model->delete();
+        });
+    }
 }

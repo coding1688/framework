@@ -76,6 +76,14 @@ class MemberVipSystemTest extends TestCase
         $this->assertSame([1, 2, 3, 7], MemberVipLevel::orderBy('level')->pluck('level')->all());
     }
 
+    public function test_effective_level_uses_the_related_level_when_the_legacy_snapshot_is_stale(): void
+    {
+        $level = MemberVipLevel::factory()->create(['level' => 5]);
+        $user = User::factory()->create(['vip_level' => 99, 'vip_level_id' => $level->id]);
+
+        $this->assertSame(5, $user->fresh()->effective_vip_level);
+    }
+
     public function test_invalid_period_and_non_privileged_access_are_rejected(): void
     {
         $admin = AdminUser::factory()->super()->create();

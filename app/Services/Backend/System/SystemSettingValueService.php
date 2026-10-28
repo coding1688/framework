@@ -2,9 +2,8 @@
 
 namespace App\Services\Backend\System;
 
-use App\Libs\Ai\AiConfiguration;
 use App\Libs\Fields\FieldRegistry;
-use App\Libs\Settings\MailConfiguration;
+use App\Libs\Settings\SettingResolverRegistry;
 use App\Libs\Settings\SettingStore;
 use App\Models\System\SystemSettingDefinition;
 use App\Models\System\SystemSettingValue;
@@ -18,7 +17,7 @@ use Illuminate\Validation\ValidationException;
 
 class SystemSettingValueService extends BaseService
 {
-    public function __construct(private readonly FieldRegistry $fields, private readonly SettingFields $settingFields, private readonly SettingStore $settings, private readonly AiConfiguration $aiConfiguration, private readonly SettingGroupTree $groups) {}
+    public function __construct(private readonly FieldRegistry $fields, private readonly SettingFields $settingFields, private readonly SettingStore $settings, private readonly SettingResolverRegistry $resolvers, private readonly SettingGroupTree $groups) {}
 
     public function options(): array
     {
@@ -33,34 +32,14 @@ class SystemSettingValueService extends BaseService
         $this->activeGroup($validated['group_id']);
 
         $definitions = SystemSettingDefinition::with(['group', 'value'])->where('group_id', $validated['group_id'])->orderBy('sort')->orderBy('id')->get();
-        $configuration = $this->aiConfiguration->resolve((array) config('ai'));
-        $openai = $configuration['providers']['openai'] ?? [];
-        $effective = [
-            'ai.enabled' => ['value_boolean' => $configuration['enabled']],
-            'ai.provider' => ['value_string' => $configuration['default']],
-            'ai.openai.text_model' => ['value_string' => $openai['text_model'] ?? 'gpt-4.1'],
-            'ai.openai.image_model' => ['value_string' => $openai['image_model'] ?? 'gpt-image-1'],
-            'ai.openai.moderation_model' => ['value_string' => $openai['moderation_model'] ?? 'omni-moderation-latest'],
-            'ai.http_timeout' => ['value_number' => $openai['timeout'] ?? 90],
-            'ai.image_timeout' => ['value_number' => $openai['image_timeout'] ?? 180],
-            'ai.max_output_tokens' => ['value_number' => $openai['max_output_tokens'] ?? 16384],
-        ];
-        $mail = app(MailConfiguration::class)->resolve();
-        foreach (['host', 'port', 'encryption', 'username', 'timeout'] as $field) {
-            $effective['mail.smtp.'.$field] = [in_array($field, ['port', 'timeout'], true) ? 'value_number' : 'value_string' => $mail[$field]];
-        }
-        $effective['mail.smtp.enabled'] = ['value_boolean' => $mail['enabled']];
-        $effective['mail.from.address'] = ['value_string' => $mail['from_address']];
-        $effective['mail.from.name'] = ['value_string' => $mail['from_name']];
+        $effective = $this->resolvers->values();
         foreach ($definitions as $definition) {
             if (! $definition->secret && isset($effective[$definition->key])) {
                 $definition->setAttribute('resolved_value', $effective[$definition->key]);
             }
-            if ($definition->key === 'mail.smtp.password') {
-                $definition->setAttribute('has_effective_value', filled($mail['password']));
-            }
-            if ($definition->key === 'ai.openai.api_key') {
-                $definition->setAttribute('has_effective_value', trim((string) ($openai['api_key'] ?? '')) !== '');
+            $hasEffectiveValue = $this->resolvers->hasValue($definition->key);
+            if ($hasEffectiveValue !== null) {
+                $definition->setAttribute('has_effective_value', $hasEffectiveValue);
             }
         }
 

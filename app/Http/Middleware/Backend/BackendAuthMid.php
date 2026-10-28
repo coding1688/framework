@@ -12,6 +12,7 @@ class BackendAuthMid
     public function handle(Request $request, Closure $next): Response
     {
         $admin = Auth::guard('backend')->user();
+        $admin?->clearAuthorizationCache();
         if (! $admin || ! $admin->active || $request->session()->get('backend.auth_version') !== $admin->auth_version) {
             Auth::guard('backend')->logout();
             $request->session()->invalidate();

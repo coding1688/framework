@@ -2,6 +2,7 @@
 
 namespace App\Models\Member;
 
+use App\Libs\File\Concerns\HasFileReferences;
 use App\Notifications\ResetUserPasswordNotification;
 use Database\Factories\Member\UserFactory;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
@@ -19,7 +20,7 @@ use Illuminate\Notifications\Notifiable;
 class User extends Authenticatable implements MustVerifyEmail
 {
     /** @use HasFactory<UserFactory> */
-    use HasFactory, Notifiable;
+    use HasFactory, HasFileReferences, Notifiable;
 
     protected $appends = ['avatar'];
 
@@ -39,6 +40,11 @@ class User extends Authenticatable implements MustVerifyEmail
         $this->notify(new ResetUserPasswordNotification($token));
     }
 
+    public function fileReferenceFields(): array
+    {
+        return ['avatar_url'];
+    }
+
     public function vipLevel(): BelongsTo
     {
         return $this->belongsTo(MemberVipLevel::class, 'vip_level_id');
@@ -51,7 +57,7 @@ class User extends Authenticatable implements MustVerifyEmail
 
     protected function effectiveVipLevel(): Attribute
     {
-        return Attribute::get(fn (): int => $this->vip_status === 'expired' || $this->vip_status === 'none' ? 0 : (int) $this->vip_level);
+        return Attribute::get(fn (): int => $this->vip_status === 'expired' || $this->vip_status === 'none' ? 0 : (int) ($this->vipLevel?->level ?? 0));
     }
 
     protected function vipStatus(): Attribute

@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands\File;
 
+use App\Libs\File\FileReferenceOwnerRegistry;
 use App\Libs\File\FileReferences;
 use App\Models\Common\FileReference;
 use Illuminate\Console\Command;
@@ -13,9 +14,9 @@ class RebuildFileReferences extends Command
 
     protected $description = 'Rebuild references for existing registered file consumers';
 
-    public function handle(FileReferences $references): int
+    public function handle(FileReferences $references, FileReferenceOwnerRegistry $owners): int
     {
-        foreach (config('files.reference_models', []) as $class) {
+        foreach ($owners->classes() as $class) {
             $model = new $class;
             if (! Schema::hasTable($model->getTable())) {
                 continue;

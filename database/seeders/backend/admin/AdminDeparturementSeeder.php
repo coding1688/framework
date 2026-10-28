@@ -18,6 +18,9 @@ class AdminDeparturementSeeder extends Seeder
             'active' => true,
         ]));
         $this->fillTranslations($board, $boardNames);
+        if (! app()->environment(['local', 'testing'])) {
+            return;
+        }
         // Create the first super administrator before any department leaders.
         $this->call(AdminUserSeeder::class);
         $board = AdminDepartment::where('code', 'board')->sole();

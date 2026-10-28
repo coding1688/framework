@@ -5,7 +5,6 @@ namespace App\Services\Backend\Admin;
 use App\Models\Admin\AdminMenu;
 use App\Services\Backend\BaseService;
 use App\Services\Backend\Common\Audit;
-use App\Services\Backend\Common\DepartmentAccess;
 use App\Services\Backend\Common\MenuDiscovery;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Auth;
@@ -14,7 +13,7 @@ use Illuminate\Validation\ValidationException;
 
 class AdminMenuService extends BaseService
 {
-    public function __construct(private DepartmentAccess $access, private MenuDiscovery $discovery) {}
+    public function __construct(private MenuDiscovery $discovery) {}
 
     public function list(): Collection
     {
@@ -32,7 +31,7 @@ class AdminMenuService extends BaseService
         $this->guardConfiguration();
 
         return DB::transaction(function () use ($validated): array {
-            $this->access->lock();
+            AdminMenu::query()->orderBy('id')->lockForUpdate()->get();
             $this->guardConfiguration();
             $permission = $validated['permission'] ?? null;
             if ($permission !== null) {
@@ -56,9 +55,9 @@ class AdminMenuService extends BaseService
     {
         $this->guardConfiguration();
         $model = DB::transaction(function () use ($validated) {
-            $this->access->lock();
+            AdminMenu::query()->orderBy('id')->lockForUpdate()->get();
             $this->guardConfiguration();
-            abort_unless($this->access->actor()->permits('admin.menu.create'), 403);
+            abort_unless(Auth::guard('backend')->user()->permits('admin.menu.create'), 403);
             $data = $validated;
 
             $this->validateHierarchy($data);
@@ -81,9 +80,9 @@ class AdminMenuService extends BaseService
     {
         $this->guardConfiguration();
         DB::transaction(function () use ($validated, $id) {
-            $this->access->lock();
+            AdminMenu::query()->orderBy('id')->lockForUpdate()->get();
             $this->guardConfiguration();
-            abort_unless($this->access->actor()->permits('admin.menu.update'), 403);
+            abort_unless(Auth::guard('backend')->user()->permits('admin.menu.update'), 403);
             // Serialize hierarchy edits to prevent concurrent parent-cycle creation.
             AdminMenu::query()->orderBy('id')->lockForUpdate()->get();
             $model = AdminMenu::query()->findOrFail($id);
@@ -116,9 +115,9 @@ class AdminMenuService extends BaseService
     {
         $this->guardConfiguration();
         DB::transaction(function () use ($id) {
-            $this->access->lock();
+            AdminMenu::query()->orderBy('id')->lockForUpdate()->get();
             $this->guardConfiguration();
-            abort_unless($this->access->actor()->permits('admin.menu.delete'), 403);
+            abort_unless(Auth::guard('backend')->user()->permits('admin.menu.delete'), 403);
             $model = AdminMenu::query()->lockForUpdate()->findOrFail($id);
 
             $inUse = $model->is_system || AdminMenu::where('parent_id', $id)->exists() || AdminMenu::where('navigation_target_id', $id)->exists() || DB::table('admin_department_menu')->where('menu_id', $id)->exists();

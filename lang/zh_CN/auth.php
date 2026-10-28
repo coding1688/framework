@@ -8,6 +8,7 @@ return [
     'oauth_not_configured' => '该第三方登录方式尚未配置。',
     'oauth_email_unverified' => '第三方平台必须提供已验证的邮箱地址。',
     'oauth_already_linked' => '该第三方账号已绑定，请勿重复操作。',
+    'oauth_account_exists' => '该邮箱已有账户，请先登录，再在个人资料中绑定第三方账号。',
     'oauth_last_login' => '请先设置密码，再解绑最后一个登录方式。',
     'password_reset_subject' => '重置账户密码',
     'password_reset_intro' => '你申请了密码重置，请点击下方按钮设置新密码。',

@@ -55,7 +55,25 @@ class UserSystemTest extends TestCase
         Notification::assertNothingSentTo($user);
     }
 
-    public function test_google_login_links_an_existing_email_and_marks_it_verified(): void
+    public function test_google_login_accepts_an_already_linked_account(): void
+    {
+        $this->configureProvider('google');
+        $user = User::factory()->create(['email' => 'existing@example.com']);
+        SocialAccount::create(['user_id' => $user->id, 'provider' => 'google', 'provider_id' => 'google-user-1']);
+        $state = $this->oauthState('google');
+        Http::fake([
+            'https://oauth2.googleapis.com/token' => Http::response(['access_token' => 'google-token']),
+            'https://openidconnect.googleapis.com/v1/userinfo' => Http::response([
+                'sub' => 'google-user-1', 'name' => 'Existing User', 'email' => 'existing@example.com', 'email_verified' => true, 'picture' => 'https://images.example.com/google.jpg',
+            ]),
+        ]);
+
+        $this->getJson(route('oauth.callback', ['provider' => 'google', 'code' => 'code', 'state' => $state]))
+            ->assertOk()->assertJsonPath('data.id', $user->id)->assertJsonPath('data.providers.0', 'google');
+        $this->assertAuthenticatedAs($user->fresh(), 'web');
+    }
+
+    public function test_google_login_rejects_an_unlinked_existing_email(): void
     {
         $this->configureProvider('google');
         $user = User::factory()->unverified()->create(['email' => 'existing@example.com']);
@@ -68,9 +86,10 @@ class UserSystemTest extends TestCase
         ]);
 
         $this->getJson(route('oauth.callback', ['provider' => 'google', 'code' => 'code', 'state' => $state]))
-            ->assertOk()->assertJsonPath('data.id', $user->id)->assertJsonPath('data.email_verified', true)->assertJsonPath('data.providers.0', 'google');
-        $this->assertAuthenticatedAs($user->fresh(), 'web');
-        $this->assertDatabaseHas('social_accounts', ['user_id' => $user->id, 'provider' => 'google', 'provider_id' => 'google-user-1']);
+            ->assertUnprocessable()->assertJsonValidationErrors('email');
+        $this->assertGuest('web');
+        $this->assertNull($user->fresh()->email_verified_at);
+        $this->assertDatabaseMissing('social_accounts', ['user_id' => $user->id, 'provider' => 'google', 'provider_id' => 'google-user-1']);
     }
 
     public function test_facebook_login_creates_a_user_with_profile_defaults(): void

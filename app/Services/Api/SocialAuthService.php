@@ -84,14 +84,14 @@ class SocialAuthService extends BaseService
         if (! $code || ! $state || ! $expectedState || ! hash_equals($expectedState, $state)) {
             throw ValidationException::withMessages(['state' => __('auth.oauth_state')]);
         }
-        $token = Http::asForm()->post($definition['token_url'], [
+        $token = Http::asForm()->connectTimeout(10)->timeout(30)->post($definition['token_url'], [
             'client_id' => $definition['client_id'], 'client_secret' => $definition['client_secret'],
             'redirect_uri' => $definition['redirect_uri'], 'code' => $code, 'grant_type' => 'authorization_code',
         ])->throw()->json('access_token');
         if (! is_string($token) || $token === '') {
             throw ValidationException::withMessages(['code' => __('auth.oauth_failed')]);
         }
-        $profile = Http::withToken($token)->acceptJson()->get($definition['userinfo_url'])->throw()->json();
+        $profile = Http::withToken($token)->acceptJson()->connectTimeout(10)->timeout(30)->get($definition['userinfo_url'])->throw()->json();
 
         return $this->identity($provider, $profile);
     }
@@ -157,14 +157,15 @@ class SocialAuthService extends BaseService
         if ($user && ! $user->active) {
             throw ValidationException::withMessages(['login' => __('auth.failed')]);
         }
-        if (! $user) {
-            $user = new User([
-                'username' => $this->uniqueUsername($identity['email']),
-                'name' => mb_substr($identity['name'] ?: Str::before($identity['email'], '@'), 0, 128),
-                'email' => $identity['email'],
-                'vip_level' => 0,
-            ]);
+        if ($user) {
+            throw ValidationException::withMessages(['email' => __('auth.oauth_account_exists')]);
         }
+        $user = new User([
+            'username' => $this->uniqueUsername($identity['email']),
+            'name' => mb_substr($identity['name'] ?: Str::before($identity['email'], '@'), 0, 128),
+            'email' => $identity['email'],
+            'vip_level' => 0,
+        ]);
         $user->forceFill([
             'avatar_url' => $user->avatar_url ?: ($identity['avatar'] ? mb_substr($identity['avatar'], 0, 512) : null),
             'email_verified_at' => $user->email_verified_at ?: now(),

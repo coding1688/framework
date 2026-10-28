@@ -4,7 +4,6 @@ namespace App\Services\Backend\File;
 
 use App\Libs\File\Constants\FileType;
 use App\Libs\File\FileManager;
-use App\Libs\File\FileStorage;
 use App\Libs\File\UploadConfiguration;
 use App\Models\Common\File;
 use App\Services\Backend\BaseService;
@@ -14,12 +13,11 @@ use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Validation\ValidationException;
 use Throwable;
 
 class FileService extends BaseService
 {
-    public function __construct(private FileManager $files, private FileStorage $fileStorage, private UploadConfiguration $uploads) {}
+    public function __construct(private FileManager $files, private UploadConfiguration $uploads) {}
 
     public function list(array $validated): LengthAwarePaginator
     {
@@ -83,15 +81,8 @@ class FileService extends BaseService
         $this->guard('delete');
         DB::transaction(function () use ($id): void {
             $model = File::lockForUpdate()->findOrFail($id);
-            if ($model->references()->exists()) {
-                throw ValidationException::withMessages(['file' => __('common/file/const.in_use')]);
-            }
-            foreach ($model->replicas as $replica) {
-                $this->fileStorage->delete($replica->disk, $replica->path);
-            }
-            $this->fileStorage->delete($model->disk, $model->path);
+            $this->files->delete($model);
             Audit::record('file.item.delete', (string) $id, ['disk' => $model->disk, 'path' => $model->path]);
-            $model->delete();
         });
     }
 

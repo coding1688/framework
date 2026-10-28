@@ -8,6 +8,7 @@ return [
     'oauth_not_configured' => 'この外部ログインは設定されていません。',
     'oauth_email_unverified' => '外部サービスで確認済みのメールアドレスが必要です。',
     'oauth_already_linked' => 'この外部アカウントはすでに連携されています。',
+    'oauth_account_exists' => 'このメールアドレスのアカウントはすでに存在します。ログイン後、プロフィールから外部アカウントを連携してください。',
     'oauth_last_login' => '最後のログイン方法を解除する前にパスワードを設定してください。',
     'password_reset_subject' => 'アカウントのパスワード再設定',
     'password_reset_intro' => 'パスワード再設定の申請を受け付けました。以下のボタンから新しいパスワードを設定してください。',

@@ -19,27 +19,40 @@ class AdminDepartmentService extends BaseService
 
     public function list(): Collection
     {
-        $query = AdminDepartment::query();
-
-        $query->whereIn('id', $this->access->visibleIds())->with(['menus', 'leaders' => function ($query) {
-            $actor = $this->access->actor();
+        $actor = $this->access->actor();
+        $visibleIds = $this->access->visibleIds();
+        $departments = AdminDepartment::with(['menus', 'leaders' => function ($query) use ($actor) {
             $query->select(['id', 'department_id', 'name', 'is_leader']);
             if (! $actor->isBoard()) {
                 $actor->is_leader ? $query->where('department_id', $actor->department_id) : $query->whereKey($actor->id);
             }
-        }]);
+        }])->orderBy('sort')->orderBy('id')->get()->keyBy('id');
+        $activeMenuIds = AdminMenu::where('active', true)->whereNull('navigation_target_id')->pluck('id')->all();
+        $effective = [];
+        $visiting = [];
+        $resolve = function (AdminDepartment $department) use (&$resolve, &$effective, &$visiting, $departments, $activeMenuIds): array {
+            if (isset($effective[$department->id])) {
+                return $effective[$department->id];
+            }
+            if (! $department->active || isset($visiting[$department->id])) {
+                return [];
+            }
+            if ($department->code === 'board') {
+                return $effective[$department->id] = $activeMenuIds;
+            }
+            $visiting[$department->id] = true;
+            $parent = $departments->get($department->parent_id);
+            $allowed = $parent ? $resolve($parent) : [];
+            unset($visiting[$department->id]);
+            $own = $department->menus->pluck('id')->all();
 
-        $query->orderBy('sort');
+            return $effective[$department->id] = array_values(array_intersect($allowed, $own));
+        };
 
-        $rows = $query->orderBy('id')->get();
-
-        $actor = $this->access->actor();
-        $rows->each(function (AdminDepartment $department) use ($actor) {
+        return $departments->whereIn('id', $visibleIds)->values()->each(function (AdminDepartment $department) use ($actor, $resolve): void {
             $department->setAttribute('can_manage', $department->code !== 'board' && ($actor->isBoard() || ($actor->is_leader && $department->parent_id === $actor->department_id)));
-            $department->setAttribute('effective_menu_ids', $department->effectiveMenuIds());
+            $department->setAttribute('effective_menu_ids', $resolve($department));
         });
-
-        return $rows;
     }
 
     public function options(): array

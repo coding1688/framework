@@ -8,6 +8,7 @@ use App\Models\Admin\AdminMenu;
 use App\Models\Admin\AdminUser;
 use Database\Seeders\DatabaseSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Tests\TestCase;
 
@@ -401,5 +402,27 @@ class BackendDepartmentGovernanceTest extends TestCase
         $this->signIn();
         $this->postJson(self::BASE.'admin/department/update/'.$parent->id, $this->payload($parent, ['active' => false]))->assertOk();
         $this->assertFalse($leader->fresh()->permits('admin.user.create'));
+    }
+
+    public function test_department_list_query_count_does_not_grow_with_additional_departments(): void
+    {
+        $this->signIn();
+        DB::enableQueryLog();
+        $this->getJson(self::BASE.'admin/department/list')->assertOk();
+        $initialQueries = count(DB::getQueryLog());
+
+        $this->department();
+        $this->department();
+        $this->department();
+        DB::flushQueryLog();
+        $response = $this->getJson(self::BASE.'admin/department/list')->assertOk();
+
+        $this->assertSame($initialQueries, count(DB::getQueryLog()));
+        foreach ($response->json('data') as $row) {
+            $this->assertSame(
+                AdminDepartment::findOrFail($row['id'])->effectiveMenuIds(),
+                $row['effective_menu_ids'],
+            );
+        }
     }
 }

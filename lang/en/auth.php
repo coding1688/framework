@@ -8,6 +8,7 @@ return [
     'oauth_not_configured' => 'This sign-in provider is not configured.',
     'oauth_email_unverified' => 'A verified email address from the provider is required.',
     'oauth_already_linked' => 'This provider account is already linked.',
+    'oauth_account_exists' => 'An account with this email already exists. Sign in first, then link the provider from your profile.',
     'oauth_last_login' => 'Set a password before unlinking your last sign-in method.',
     'password_reset_subject' => 'Reset your password',
     'password_reset_intro' => 'You requested a password reset. Use the button below to choose a new password.',

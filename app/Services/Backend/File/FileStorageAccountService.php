@@ -3,6 +3,7 @@
 namespace App\Services\Backend\File;
 
 use App\Jobs\FileSyncBatch;
+use App\Libs\File\FileReferenceOwnerRegistry;
 use App\Libs\File\StorageRegistry;
 use App\Libs\File\StorageSynchronizer;
 use App\Libs\File\UploadConfiguration;
@@ -22,7 +23,7 @@ use Illuminate\Validation\ValidationException;
 
 class FileStorageAccountService extends BaseService
 {
-    public function __construct(private readonly UploadConfiguration $uploads, private readonly StorageRegistry $storages, private readonly StorageSynchronizer $synchronizer) {}
+    public function __construct(private readonly UploadConfiguration $uploads, private readonly StorageRegistry $storages, private readonly StorageSynchronizer $synchronizer, private readonly FileReferenceOwnerRegistry $referenceOwners) {}
 
     public function list(): Collection
     {
@@ -242,7 +243,7 @@ class FileStorageAccountService extends BaseService
 
     private function hasUrlReferences(string $disk): bool
     {
-        $idConsumers = collect(config('files.reference_models', []))->map(fn (string $class) => new $class)
+        $idConsumers = collect($this->referenceOwners->classes())->map(fn (string $class) => new $class)
             ->filter(fn ($owner): bool => $owner->fileReferenceIdFields() !== []);
 
         return FileReference::whereIn('file_id', File::where('disk', $disk)->select('id'))

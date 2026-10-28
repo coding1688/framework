@@ -60,10 +60,10 @@ class AdminUserService extends BaseService
     public function create(array $validated, ?string $ip = null): AdminUser
     {
         $admin = DB::transaction(function () use ($validated, $ip) {
-            $this->access->lock();
             abort_unless($this->access->actor()->permits('admin.user.create'), 403);
             $data = Arr::except($validated, 'role_ids');
             $data['department_id'] ??= $this->access->actor()->department_id ?? AdminDepartment::where('code', 'board')->sole()->id;
+            $this->access->lockAccounts([$data['department_id']]);
             $this->access->requireDepartment($data['department_id']);
             $data['locale'] ??= app()->getLocale();
             $data['active'] ??= true;
@@ -83,8 +83,9 @@ class AdminUserService extends BaseService
     public function update(array $validated, int $id): void
     {
         DB::transaction(function () use ($validated, $id) {
-            $this->access->lock();
             abort_unless($this->access->actor()->permits('admin.user.update'), 403);
+            $current = AdminUser::findOrFail($id);
+            $this->access->lockAccounts([$current->department_id, $validated['department_id'] ?? $current->department_id], $id);
             $administrator = AdminUser::lockForUpdate()->findOrFail($id);
             $this->protect($administrator);
             $oldDepartment = $administrator->department_id;
@@ -108,8 +109,9 @@ class AdminUserService extends BaseService
     {
         $data = $validated;
         DB::transaction(function () use ($id, $data) {
-            $this->access->lock();
             abort_unless($this->access->actor()->permits('admin.user.status'), 403);
+            $current = AdminUser::findOrFail($id);
+            $this->access->lockAccounts([$current->department_id], $id);
             $locked = AdminUser::lockForUpdate()->findOrFail($id);
             $this->protect($locked);
             $locked->forceFill(['active' => $data['active'], 'auth_version' => $locked->auth_version + 1])->save();
@@ -123,8 +125,9 @@ class AdminUserService extends BaseService
     public function delete(int $id): void
     {
         DB::transaction(function () use ($id) {
-            $this->access->lock();
             abort_unless($this->access->actor()->permits('admin.user.delete'), 403);
+            $current = AdminUser::findOrFail($id);
+            $this->access->lockAccounts([$current->department_id], $id);
             $administrator = AdminUser::lockForUpdate()->findOrFail($id);
             $this->protect($administrator);
             abort_if($administrator->active, 422, __('backend/admin.disable_before_delete'));
@@ -140,8 +143,9 @@ class AdminUserService extends BaseService
     {
         $data = $validated;
         DB::transaction(function () use ($id, $data, $ip) {
-            $this->access->lock();
             abort_unless($this->access->actor()->permits('admin.user.password'), 403);
+            $current = AdminUser::findOrFail($id);
+            $this->access->lockAccounts([$current->department_id], $id);
             $locked = AdminUser::lockForUpdate()->findOrFail($id);
             $this->protect($locked);
             $locked->forceFill(['password' => $data['password'], 'password_changed_at' => now(), 'password_changed_ip' => $ip, 'auth_version' => $locked->auth_version + 1])->save();

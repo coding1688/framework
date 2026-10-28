@@ -22,6 +22,22 @@ class DepartmentAccess
         $this->actor()->refresh();
     }
 
+    /** @param list<int> $departmentIds */
+    public function lockAccounts(array $departmentIds, ?int $userId = null): void
+    {
+        $departmentIds = array_values(array_unique(array_filter($departmentIds)));
+        AdminDepartment::whereIn('id', $departmentIds)->orderBy('id')->lockForUpdate()->get();
+        AdminUser::where(function ($query) use ($departmentIds, $userId): void {
+            if ($userId !== null) {
+                $query->whereKey($userId);
+            }
+            if ($departmentIds !== []) {
+                $userId === null ? $query->whereIn('department_id', $departmentIds) : $query->orWhereIn('department_id', $departmentIds);
+            }
+        })->orderBy('id')->lockForUpdate()->get();
+        $this->actor()->refresh();
+    }
+
     public function ids(?int $root): array
     {
         if ($root === null) {

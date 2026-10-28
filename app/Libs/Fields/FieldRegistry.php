@@ -23,8 +23,13 @@ final class FieldRegistry
     {
         $fields = [new TextField, new LocalizedTextField($locales), new NumberField, new CheckboxField, new RadioField, new SwitchField, new SelectField];
         foreach ($fields as $field) {
-            $this->fields[$field->key()] = $field;
+            $this->register($field);
         }
+    }
+
+    public function register(FieldType $field): void
+    {
+        $this->fields[$field->key()] = $field;
     }
 
     public function optionSources(): OptionSourceRegistry

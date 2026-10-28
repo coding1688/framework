@@ -8,6 +8,7 @@ return [
     'oauth_not_configured' => '該第三方登入方式尚未設定。',
     'oauth_email_unverified' => '第三方平台必須提供已驗證的電子郵件地址。',
     'oauth_already_linked' => '此第三方帳號已綁定，請勿重複操作。',
+    'oauth_account_exists' => '此電子郵件已有帳戶，請先登入，再在個人資料中綁定第三方帳號。',
     'oauth_last_login' => '請先設定密碼，再解除最後一個登入方式。',
     'password_reset_subject' => '重設帳戶密碼',
     'password_reset_intro' => '你申請了密碼重設，請點擊下方按鈕設定新密碼。',

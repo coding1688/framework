@@ -22,6 +22,10 @@ class AdminUser extends Authenticatable implements SecurityPasswordAccount
 
     protected $table = 'admin_users';
 
+    private ?array $resolvedPermissions = null;
+
+    private ?bool $boardStatus = null;
+
     protected $attributes = ['is_leader' => false, 'is_super' => false, 'auth_version' => 1];
 
     protected $fillable = ['name', 'username', 'email', 'password', 'department_id', 'locale', 'active', 'is_leader'];
@@ -38,6 +42,19 @@ class AdminUser extends Authenticatable implements SecurityPasswordAccount
         return array_replace(config('platform.backend_ui.theme.defaults'), $this->preferences ?? []);
     }
 
+    public function clearAuthorizationCache(): void
+    {
+        $this->resolvedPermissions = null;
+        $this->boardStatus = null;
+    }
+
+    public function refresh(): static
+    {
+        $this->clearAuthorizationCache();
+
+        return parent::refresh();
+    }
+
     protected static function newFactory(): AdminUserFactory
     {
         return AdminUserFactory::new();
@@ -50,11 +67,14 @@ class AdminUser extends Authenticatable implements SecurityPasswordAccount
 
     public function permissions(): array
     {
+        if ($this->resolvedPermissions !== null) {
+            return $this->resolvedPermissions;
+        }
         if (! $this->active) {
-            return [];
+            return $this->resolvedPermissions = [];
         }
         if ($this->isBoard()) {
-            return ['*'];
+            return $this->resolvedPermissions = ['*'];
         }
         $departmentIds = $this->department()->first()?->effectiveMenuIds() ?? [];
         $departmentPermissions = AdminMenu::whereIn('id', $departmentIds)->get()->pluck('permission')->unique()->values()->all();
@@ -65,12 +85,12 @@ class AdminUser extends Authenticatable implements SecurityPasswordAccount
             ));
         }
 
-        return $departmentPermissions;
+        return $this->resolvedPermissions = $departmentPermissions;
     }
 
     public function isBoard(): bool
     {
-        return $this->active && ($this->is_super || $this->department()->where('code', 'board')->where('active', true)->exists());
+        return $this->boardStatus ??= $this->active && ($this->is_super || $this->department()->where('code', 'board')->where('active', true)->exists());
     }
 
     public function permits(string $permission): bool
