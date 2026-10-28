@@ -1,0 +1,9 @@
+{
+  "references_count": "References", "reference_type": "Used by", "reference_id": "Record ID", "reference_field": "Field",
+  "upload_files": "Upload files", "storage_provider": "Storage provider",
+  "provider_local": "Local storage", "provider_aws": "Amazon S3", "provider_cloudflare": "Cloudflare R2", "provider_aliyun": "Alibaba Cloud OSS", "provider_google": "Google Cloud Storage", "provider_s3_compatible": "S3-compatible storage",
+  "not_configured": "Not configured", "visibility": "Visibility", "public": "Public", "private": "Private",
+  "type": "Usage type", "files": "Files", "drop_or_select": "Drop files here or click to select", "upload_tip": "Up to {count} files per upload, {size} MB each", "start_upload": "Start upload", "select_files": "Select at least one file", "file_limit": "Too many files selected", "uploaded": "Files uploaded",
+  "search_placeholder": "Search filename or path", "file_type": "File type", "images": "Images", "videos": "Videos", "audio": "Audio", "documents": "Documents",
+  "preview": "Preview", "original_name": "Original name", "mime_type": "MIME type", "size": "Size", "uploader": "Uploader", "copy_url": "Copy URL", "url_copied": "URL copied", "file_details": "File details", "dimensions": "Dimensions", "path": "Storage path", "checksum": "SHA-256 checksum"
+}

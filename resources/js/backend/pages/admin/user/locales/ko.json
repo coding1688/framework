@@ -1,0 +1,21 @@
+{
+  "created_ip": "생성 IP",
+  "created_time": "생성일",
+  "created_by": "생성자",
+  "login_ip_location": "마지막 로그인 IP(위치)",
+  "login_device": "마지막 로그인 기기",
+  "password_changed_at": "비밀번호 마지막 변경일",
+  "password_changed_ip": "비밀번호 변경 IP",
+  "disable_before_delete": "삭제하기 전에 관리자를 비활성화하세요.",
+  "disable_account": "비활성화",
+  "enable_account": "활성화",
+  "administrators": "관리자",
+  "search_hint": "이름 또는 이메일 검색",
+  "last_login": "마지막 로그인",
+  "super": "최고 관리자",
+  "no_role": "할당된 역할 없음",
+  "username": "사용자 이름",
+  "protected_account": "이 계정은 보호되어 있습니다. 계정 보안에서 본인의 비밀번호를 변경하세요.",
+  "admin_intro": "팀 계정과 부서를 관리합니다.",
+  "protected": "보호됨"
+}

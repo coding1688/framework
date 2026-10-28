@@ -1,0 +1,8 @@
+{
+  "center": "알림 센터",
+  "unread": "읽지 않음 {count}개",
+  "read_all": "모두 읽음",
+  "preferences": "수신 설정",
+  "database": "인앱 알림",
+  "mail": "이메일"
+}

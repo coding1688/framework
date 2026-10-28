@@ -1,0 +1,12 @@
+<?php
+
+return [
+    'logs' => '監査ログ',
+    'search_logs' => '実行者または操作を検索',
+    'actor' => '実行者',
+    'action' => '操作',
+    'subject' => '対象 ID',
+    'time' => '日時',
+    'details' => '詳細',
+    'log_intro' => 'ワークスペース内のサインインと変更を追跡します。',
+];

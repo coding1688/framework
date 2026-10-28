@@ -1,0 +1,24 @@
+<?php
+
+return [
+    'created_ip' => 'IP ที่ใช้สร้าง',
+    'created_time' => 'สร้างเมื่อ',
+    'created_by' => 'สร้างโดย',
+    'login_ip_location' => 'IP เข้าสู่ระบบล่าสุด (ตำแหน่ง)',
+    'login_device' => 'อุปกรณ์เข้าสู่ระบบล่าสุด',
+    'password_changed_at' => 'เปลี่ยนรหัสผ่านล่าสุดเมื่อ',
+    'password_changed_ip' => 'IP ที่ใช้เปลี่ยนรหัสผ่าน',
+    'nickname' => 'ชื่อเล่น',
+    'disable_before_delete' => 'ปิดใช้งานผู้ดูแลก่อนลบ',
+    'disable_account' => 'ปิดใช้งาน',
+    'enable_account' => 'เปิดใช้งาน',
+    'administrators' => 'ผู้ดูแล',
+    'search_hint' => 'ค้นหาชื่อหรืออีเมล',
+    'last_login' => 'เข้าสู่ระบบล่าสุด',
+    'super' => 'ผู้ดูแลระบบสูงสุด',
+    'no_role' => 'ยังไม่ได้กำหนดบทบาท',
+    'username' => 'ชื่อผู้ใช้',
+    'protected_account' => 'บัญชีนี้ได้รับการป้องกัน เปลี่ยนรหัสผ่านของคุณได้ในความปลอดภัยของบัญชี',
+    'admin_intro' => 'จัดการบัญชีทีมและแผนก',
+    'protected' => 'ได้รับการป้องกัน',
+];

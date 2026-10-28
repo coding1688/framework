@@ -1,0 +1,11 @@
+{
+  "title": "캐러셀 제목",
+  "search_placeholder": "캐러셀 제목 검색",
+  "image": "캐러셀 이미지",
+  "link_url": "이동 URL",
+  "link_placeholder": "https://example.com 또는 /path",
+  "upload_image": "이미지 업로드",
+  "replace_image": "이미지 교체",
+  "uploaded": "이미지를 업로드했습니다",
+  "upload_hint": "JPG, PNG, GIF, WebP를 지원하며 크기 제한은 스토리지 설정을 따릅니다."
+}

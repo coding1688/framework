@@ -1,0 +1,48 @@
+<?php
+
+return [
+    'required' => 'ต้องกรอก :attribute',
+    'string' => ':attribute ต้องเป็นข้อความ',
+    'email' => ':attribute ต้องเป็นอีเมลที่ถูกต้อง',
+    'integer' => ':attribute ต้องเป็นจำนวนเต็ม',
+    'boolean' => ':attribute ต้องเป็นสถานะที่ถูกต้อง',
+    'array' => ':attribute ต้องเป็นรายการที่ถูกต้อง',
+    'exists' => ':attribute ที่เลือกไม่มีอยู่',
+    'unique' => ':attribute ถูกใช้งานแล้ว',
+    'in' => ':attribute ที่เลือกไม่ถูกต้อง',
+    'regex' => 'รูปแบบ :attribute ไม่ถูกต้อง',
+    'distinct' => ':attribute มีค่าซ้ำ',
+    'present' => 'ต้องมี :attribute',
+    'prohibited' => 'ไม่สามารถกำหนด :attribute ได้',
+    'confirmed' => 'การยืนยัน :attribute ไม่ตรงกัน',
+    'min' => [
+        'string' => ':attribute ต้องมีอย่างน้อย :min ตัวอักษร',
+        'numeric' => ':attribute ต้องไม่น้อยกว่า :min',
+    ],
+    'max' => [
+        'string' => ':attribute ต้องไม่เกิน :max ตัวอักษร',
+        'numeric' => ':attribute ต้องไม่เกิน :max',
+        'array' => ':attribute ต้องมีไม่เกิน :max รายการ',
+    ],
+    'password' => [
+        'mixed' => ':attribute ต้องมีตัวพิมพ์ใหญ่และตัวพิมพ์เล็ก',
+        'numbers' => ':attribute ต้องมีตัวเลข',
+    ],
+    'attributes' => [
+        'name' => 'ชื่อ',
+        'email' => 'อีเมล',
+        'password' => 'รหัสผ่าน',
+        'current_password' => 'รหัสผ่านปัจจุบัน',
+        'active' => 'เปิดใช้งาน',
+        'locale' => 'ภาษา',
+        'type' => 'ประเภท',
+        'permission' => 'คีย์สิทธิ์',
+        'path' => 'เส้นทางหน้า',
+        'sort' => 'ลำดับการจัดเรียง',
+        'description' => 'คำอธิบาย',
+        'role_ids' => 'บทบาท',
+        'menu_ids' => 'สิทธิ์หน้าและปุ่ม',
+        'parent_id' => 'รายการแม่',
+        'department_id' => 'แผนก',
+    ],
+];

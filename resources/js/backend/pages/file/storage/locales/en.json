@@ -1,0 +1,20 @@
+{
+  "storages": "Storage accounts", "upload_rules": "Upload rules", "synchronization": "Synchronization",
+  "name": "Display name", "disk": "Storage identifier", "location": "Bucket / directory", "default": "Default storage",
+  "enabled": "Enabled", "disabled": "Disabled / incomplete", "max_upload_mb": "Upload limit (MB)", "extensions": "Allowed extensions",
+  "size_hint": "0 disables uploads. PHP and web-server limits still apply.", "add_extension": "Add extension",
+  "directory": "Local directory", "directory_hint": "Relative to storage/app. Public access requires a web-server mapping; use the built-in public storage for existing /storage URLs.",
+  "bucket": "Bucket", "region": "Region", "endpoint": "S3 API endpoint", "public_url": "Public access URL", "path_style": "Use path-style endpoint",
+  "keep_secret": "Configured; leave blank to keep", "r2_hint": "R2: region auto. Public images need a connected custom domain or a development r2.dev URL. This setting does not make the bucket public.",
+  "storage_hint": "Credentials are encrypted and never returned. Changing the default only affects new uploads; existing file addresses stay unchanged.",
+  "sync_hint": "One-way copy of registered files only; retains the source and current URLs. SHA-256 verifies copies. Conflicting objects are not overwritten. Private files cannot be copied to public storage.",
+  "sync_confirm": "Copy registered files to the selected storage? Source files and existing image addresses will be retained.",
+  "source": "Source storage", "target": "Target storage", "start_sync": "Start synchronization", "queued": "Synchronization queued",
+  "worker_hint": "The queue worker must be running:", "direction": "Direction", "progress": "Progress", "counts": "Copied / skipped / failed", "total": "Total",
+  "pending": "Pending", "running": "Running", "completed": "Completed", "failed": "Failed", "retry": "Retry", "synced_at": "Synced at",
+  "file_copy_failed": "Copy failed. Check source availability, target credentials, visibility and checksum conflicts, then retry.",
+  "worker_failed": "Worker failed or timed out. Check the queue worker and retry.",
+  "storage_disabled": "Source or target storage is disabled.", "visibility_mismatch": "Source and target visibility do not match.",
+  "destination_conflict": "A different file already exists at the target path; it was not overwritten.",
+  "source_checksum_mismatch": "Source contents do not match the registered checksum.", "destination_checksum_mismatch": "Copied contents failed checksum verification."
+}

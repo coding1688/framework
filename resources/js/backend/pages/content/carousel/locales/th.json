@@ -1,0 +1,11 @@
+{
+  "title": "ชื่อภาพสไลด์",
+  "search_placeholder": "ค้นหาชื่อภาพสไลด์",
+  "image": "รูปภาพสไลด์",
+  "link_url": "URL ปลายทาง",
+  "link_placeholder": "https://example.com หรือ /path",
+  "upload_image": "อัปโหลดรูปภาพ",
+  "replace_image": "เปลี่ยนรูปภาพ",
+  "uploaded": "อัปโหลดรูปภาพแล้ว",
+  "upload_hint": "รองรับ JPG, PNG, GIF และ WebP ขีดจำกัดขนาดเป็นไปตามการตั้งค่าที่จัดเก็บ"
+}

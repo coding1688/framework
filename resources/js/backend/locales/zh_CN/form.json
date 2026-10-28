@@ -1,0 +1,9 @@
+{
+  "email": "邮箱地址",
+  "password": "密码",
+  "new_password": "新密码",
+  "password_confirmation": "确认新密码",
+  "password_hint": "至少12位，包含大小写字母和数字",
+  "reset_password": "重置密码",
+  "nickname": "昵称"
+}

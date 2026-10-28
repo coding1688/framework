@@ -1,0 +1,11 @@
+{
+  "title": "Carousel title",
+  "search_placeholder": "Search carousel titles",
+  "image": "Carousel image",
+  "link_url": "Destination URL",
+  "link_placeholder": "https://example.com or /path",
+  "upload_image": "Upload image",
+  "replace_image": "Replace image",
+  "uploaded": "Image uploaded",
+  "upload_hint": "JPG, PNG, GIF and WebP are supported. Size limits follow storage settings."
+}

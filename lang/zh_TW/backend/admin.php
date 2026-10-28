@@ -1,0 +1,26 @@
+<?php
+
+return [
+    'created_ip' => '新增IP',
+    'created_time' => '新增時間',
+    'created_by' => '新增人',
+    'login_ip_location' => '最近登入IP（地點）',
+    'login_device' => '最近登入裝置',
+    'password_changed_at' => '上次修改密碼時間',
+    'password_changed_ip' => '上次修改密碼IP',
+
+    'nickname' => '暱稱',
+    'disable_before_delete' => '請先停用管理員後再刪除。',
+    'disable_account' => '停用',
+    'enable_account' => '啟用',
+
+    'administrators' => '管理員',
+    'search_hint' => '搜尋名稱或電子郵件',
+    'last_login' => '最近登入',
+    'super' => '超級管理員',
+    'no_role' => '未指派角色',
+    'username' => '使用者名稱',
+    'protected_account' => '此帳號受保護，請在帳號安全中修改自己的密碼',
+    'admin_intro' => '統一管理團隊帳號與所屬部門。',
+    'protected' => '受保護',
+];

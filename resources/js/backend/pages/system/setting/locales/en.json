@@ -1,0 +1,18 @@
+{
+  "title": "System settings",
+  "groups": "Setting groups",
+  "empty": "No settings in this group.",
+  "secret_placeholder": "Leave blank to keep the current setting",
+  "secret_configured": "Configured",
+  "restore_pending": "Restore after saving",
+  "restore_default": "Restore default",
+  "cancel_restore": "Cancel restore",
+  "secret_empty_placeholder": "Enter a value",
+  "current_value": "Current value",
+  "configure": "Configure",
+  "not_configured": "Not configured",
+  "yes": "Yes",
+  "no": "No",
+  "change_status": "Change status",
+  "status_confirmation": "Change the status of “:name”?"
+}

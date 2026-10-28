@@ -1,0 +1,1 @@
+{"pending":"대기 중","reserved":"처리 중","failed":"실패 작업","jobs":"큐 작업","name":"작업","queue":"큐","attempts":"시도 횟수","exception":"예외","retry":"재시도","retry_batch":"선택 재시도","failure_detail":"실패 상세"}

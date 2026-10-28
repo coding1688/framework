@@ -1,0 +1,11 @@
+{
+  "title": "カルーセルタイトル",
+  "search_placeholder": "カルーセルタイトルを検索",
+  "image": "カルーセル画像",
+  "link_url": "リンク先URL",
+  "link_placeholder": "https://example.com または /path",
+  "upload_image": "画像をアップロード",
+  "replace_image": "画像を差し替える",
+  "uploaded": "画像をアップロードしました",
+  "upload_hint": "JPG、PNG、GIF、WebPに対応しています。サイズ上限はストレージ設定に従います。"
+}

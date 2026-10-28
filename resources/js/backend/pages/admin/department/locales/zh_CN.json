@@ -1,0 +1,20 @@
+{
+  "no_create_leader": "不创建",
+  "employee_management": "员工管理",
+  "assign_permissions": "授权",
+  "leaders": "部门 Leader",
+  "is_leader": "设为 Leader",
+  "employee": "普通员工",
+  "board": "董事会",
+  "board_protected": "董事会为固定根部门，不可修改、停用或删除。",
+  "leader_count": "每个下属部门必须有 1–2 位在职 Leader，请先安排接任人。",
+  "department_scope": "仅董事会或所在部门 Leader 可在授权范围内操作，不能管理同级或上级部门。",
+  "grant_scope": "分配的权限必须同时在本人和上级部门的有效权限范围内。",
+  "leader_mode": "Leader 设置方式",
+  "existing_leader": "选择现有员工",
+  "new_leader": "同时新建 Leader",
+  "leader_hint": "必须选择 1–2 位在职员工；调走其他部门最后一位 Leader 会被阻止。",
+  "department_hint": "董事会 → 部门 → 分组。下属部门必须有 1–2 位 Leader；撤销上级权限会同步收回下级授权。",
+  "departments": "部门管理",
+  "department": "所属部门"
+}

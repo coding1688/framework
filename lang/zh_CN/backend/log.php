@@ -1,0 +1,12 @@
+<?php
+
+return [
+    'logs' => '操作日志',
+    'search_logs' => '搜索操作者或操作标识',
+    'actor' => '操作者',
+    'action' => '操作标识',
+    'subject' => '对象 ID',
+    'time' => '时间',
+    'details' => '详情',
+    'log_intro' => '追踪登录与管理操作，保留团队操作记录。',
+];

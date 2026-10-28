@@ -1,0 +1,20 @@
+{
+  "storages": "存储账号", "upload_rules": "上传规则", "synchronization": "存储同步",
+  "name": "显示名称", "disk": "存储标识", "location": "存储桶 / 目录", "default": "默认存储",
+  "enabled": "已启用", "disabled": "未启用 / 未配齐", "max_upload_mb": "上传大小上限（MB）", "extensions": "允许上传的后缀",
+  "size_hint": "设为 0 禁止上传；PHP 和 Web 服务器的限制仍然生效。", "add_extension": "添加后缀",
+  "directory": "本地目录", "directory_hint": "相对于 storage/app；公开访问需要配置 Web 服务器映射，已有 /storage 地址请使用内置本地公开存储。",
+  "bucket": "存储桶", "region": "区域", "endpoint": "S3 API 地址", "public_url": "公开访问地址", "path_style": "使用路径形式的端点",
+  "keep_secret": "已配置；留空保留原值", "r2_hint": "R2 区域填写 auto。公开图片需在 Cloudflare 绑定自定义域名或启用开发用 r2.dev 地址；这里的公开选项不会自动开放存储桶。",
+  "storage_hint": "密钥加密保存且不回显。切换默认存储只影响新上传文件，不改变现有文件地址。",
+  "sync_hint": "仅单向复制平台登记的文件，保留源文件和现有地址；使用 SHA-256 校验，不覆盖内容冲突的文件，也不允许私有文件同步到公开存储。",
+  "sync_confirm": "确认复制已登记文件到目标存储？源文件和现有图片地址都会保留。",
+  "source": "源存储", "target": "目标存储", "start_sync": "开始同步", "queued": "同步任务已排队",
+  "worker_hint": "需要运行队列处理进程：", "direction": "同步方向", "progress": "进度", "counts": "成功 / 跳过 / 失败", "total": "总数",
+  "pending": "等待处理", "running": "同步中", "completed": "已完成", "failed": "失败", "retry": "重试", "synced_at": "同步时间",
+  "file_copy_failed": "复制失败。请检查源文件、目标存储凭据、公开性和校验冲突后重试。",
+  "worker_failed": "处理进程异常或超时，请检查队列进程后重试。",
+  "storage_disabled": "源或目标存储已停用。", "visibility_mismatch": "源文件与目标存储的公开性不一致。",
+  "destination_conflict": "目标同路径已有内容不同的文件，未覆盖。",
+  "source_checksum_mismatch": "源文件内容与登记的校验值不一致。", "destination_checksum_mismatch": "复制后的文件校验未通过。"
+}

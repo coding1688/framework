@@ -1,0 +1,22 @@
+<?php
+
+namespace App\Models\Common;
+
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
+
+class FileReference extends Model
+{
+    protected $fillable = ['file_id', 'reference_type', 'reference_id', 'field'];
+
+    public function file(): BelongsTo
+    {
+        return $this->belongsTo(File::class, 'file_id');
+    }
+
+    public function reference(): MorphTo
+    {
+        return $this->morphTo();
+    }
+}

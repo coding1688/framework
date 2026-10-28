@@ -1,0 +1,18 @@
+{
+  "title": "系統設定",
+  "groups": "設定分類",
+  "empty": "此分類暫無設定項目。",
+  "secret_placeholder": "留空保留目前設定",
+  "secret_configured": "已設定",
+  "restore_pending": "儲存後恢復預設",
+  "restore_default": "恢復預設",
+  "cancel_restore": "取消恢復",
+  "secret_empty_placeholder": "請輸入設定值",
+  "current_value": "目前值",
+  "configure": "設定",
+  "not_configured": "未設定",
+  "yes": "是",
+  "no": "否",
+  "change_status": "修改狀態",
+  "status_confirmation": "確認修改「:name」的狀態？"
+}

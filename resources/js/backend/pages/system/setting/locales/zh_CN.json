@@ -1,0 +1,18 @@
+{
+  "title": "系统设置",
+  "groups": "设置分类",
+  "empty": "此分类暂无配置项。",
+  "secret_placeholder": "留空保持当前设置",
+  "secret_configured": "已设置",
+  "restore_pending": "保存后恢复默认",
+  "restore_default": "恢复默认",
+  "cancel_restore": "取消恢复",
+  "secret_empty_placeholder": "请输入配置值",
+  "current_value": "当前值",
+  "configure": "设置",
+  "not_configured": "未配置",
+  "yes": "是",
+  "no": "否",
+  "change_status": "修改状态",
+  "status_confirmation": "确认修改“:name”的状态？"
+}

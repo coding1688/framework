@@ -1,0 +1,48 @@
+<?php
+
+return [
+    'required' => 'The :attribute field is required.',
+    'string' => 'The :attribute must be text.',
+    'email' => 'The :attribute must be a valid email address.',
+    'integer' => 'The :attribute must be an integer.',
+    'boolean' => 'The :attribute must be a valid status.',
+    'array' => 'The :attribute must be a valid list.',
+    'exists' => 'The selected :attribute does not exist.',
+    'unique' => 'The :attribute is already in use.',
+    'in' => 'The selected :attribute is invalid.',
+    'regex' => 'The :attribute format is invalid.',
+    'distinct' => 'The :attribute contains duplicates.',
+    'present' => 'The :attribute field must be present.',
+    'prohibited' => 'The :attribute field cannot be set.',
+    'confirmed' => 'The :attribute confirmation does not match.',
+    'min' => [
+        'string' => 'The :attribute must have at least :min characters.',
+        'numeric' => 'The :attribute must be at least :min.',
+    ],
+    'max' => [
+        'string' => 'The :attribute may not exceed :max characters.',
+        'numeric' => 'The :attribute may not exceed :max.',
+        'array' => 'The :attribute may not exceed :max items.',
+    ],
+    'password' => [
+        'mixed' => 'The :attribute must contain uppercase and lowercase letters.',
+        'numbers' => 'The :attribute must contain a number.',
+    ],
+    'attributes' => [
+        'name' => 'Name',
+        'email' => 'Email address',
+        'password' => 'Password',
+        'current_password' => 'Current password',
+        'active' => 'Enabled',
+        'locale' => 'Language',
+        'type' => 'Type',
+        'permission' => 'Permission key',
+        'path' => 'Page path',
+        'sort' => 'Sort order',
+        'description' => 'Description',
+        'role_ids' => 'Roles',
+        'menu_ids' => 'Page & button permissions',
+        'parent_id' => 'Parent',
+        'department_id' => 'Department',
+    ],
+];

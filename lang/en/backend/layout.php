@@ -1,0 +1,15 @@
+<?php
+
+return [
+    'brand' => 'Admin console',
+    'home' => 'Overview',
+    'welcome' => 'Great content starts with a well-organized team.',
+    'intro' => 'Manage your team, organization and access. Focus on every thoughtful review.',
+    'team_access' => 'Team & access',
+    'system' => 'System management',
+    'workspace' => 'Tech reviews · Administration',
+    'open' => 'Open workspace',
+    'no_access' => 'No permissions assigned. Contact your super administrator.',
+    'page_tabs' => 'Open pages',
+    'close_page' => 'Close page',
+];

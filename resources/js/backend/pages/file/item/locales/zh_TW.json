@@ -1,0 +1,9 @@
+{
+  "references_count": "引用數", "reference_type": "引用對象", "reference_id": "紀錄 ID", "reference_field": "引用欄位",
+  "upload_files": "上傳檔案", "storage_provider": "儲存服務",
+  "provider_local": "本機儲存", "provider_aws": "Amazon S3", "provider_cloudflare": "Cloudflare R2", "provider_aliyun": "阿里雲 OSS", "provider_google": "Google Cloud Storage", "provider_s3_compatible": "S3 相容儲存",
+  "not_configured": "未設定", "visibility": "存取範圍", "public": "公開", "private": "私有",
+  "type": "用途類型", "files": "檔案", "drop_or_select": "拖曳檔案到這裡，或點擊選擇", "upload_tip": "每次最多 {count} 個檔案，每個不超過 {size} MB", "start_upload": "開始上傳", "select_files": "請至少選擇一個檔案", "file_limit": "選擇的檔案數量超過限制", "uploaded": "檔案上傳成功",
+  "search_placeholder": "搜尋檔名或路徑", "file_type": "檔案類型", "images": "圖片", "videos": "影片", "audio": "音訊", "documents": "文件",
+  "preview": "預覽", "original_name": "原始檔名", "mime_type": "MIME 類型", "size": "大小", "uploader": "上傳者", "copy_url": "複製網址", "url_copied": "檔案網址已複製", "file_details": "檔案詳情", "dimensions": "圖片尺寸", "path": "儲存路徑", "checksum": "SHA-256 校驗值"
+}

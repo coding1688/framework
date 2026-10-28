@@ -1,0 +1,64 @@
+.file-preview {
+    align-items: center;
+    color: var(--el-color-primary);
+    display: inline-flex;
+    font-size: 26px;
+    height: 42px;
+    justify-content: center;
+    overflow: hidden;
+    vertical-align: middle;
+    width: 56px;
+}
+
+.file-preview img {
+    border-radius: 5px;
+    height: 100%;
+    object-fit: cover;
+    width: 100%;
+}
+
+.file-preview--private {
+    color: var(--el-text-color-secondary);
+}
+
+.file-detail-preview {
+    align-items: center;
+    background: var(--el-fill-color-light);
+    border: 1px solid var(--el-border-color-lighter);
+    border-radius: 6px;
+    display: flex;
+    justify-content: center;
+    margin-bottom: 16px;
+    min-height: 180px;
+    padding: 12px;
+}
+
+.file-detail-preview img {
+    max-height: 360px;
+    max-width: 100%;
+    object-fit: contain;
+}
+
+.el-upload,
+.el-upload-dragger {
+    width: 100%;
+}
+
+.file-list-primary {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.file-list-secondary {
+    color: var(--el-text-color-secondary);
+    font-size: 12px;
+    margin-top: 4px;
+}
+
+.file-upload-dialog .el-dialog__body { padding: 14px 18px; }
+.file-upload-dialog .el-form-item { margin-bottom: 12px; }
+.file-upload-dialog .field-grid { gap: 12px; }
+.file-upload-dialog .el-upload-dragger { padding: 16px 10px; }
+.file-upload-dialog .el-icon--upload { margin-bottom: 8px; font-size: 40px; line-height: 44px; }
+

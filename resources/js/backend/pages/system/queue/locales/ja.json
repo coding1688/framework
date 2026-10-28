@@ -1,0 +1,1 @@
+{"pending":"保留中","reserved":"処理中","failed":"失敗したジョブ","jobs":"キュージョブ","name":"ジョブ","queue":"キュー","attempts":"試行回数","exception":"例外","retry":"再試行","retry_batch":"選択を再試行","failure_detail":"失敗詳細"}

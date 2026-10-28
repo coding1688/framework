@@ -1,0 +1,1 @@
+{"pending":"等待中","reserved":"處理中","failed":"失敗任務","jobs":"佇列任務","name":"任務","queue":"佇列","attempts":"嘗試次數","exception":"例外","retry":"重試","retry_batch":"批次重試","failure_detail":"失敗詳情"}

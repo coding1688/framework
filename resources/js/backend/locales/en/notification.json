@@ -1,0 +1,8 @@
+{
+  "center": "Notifications",
+  "unread": "{count} unread",
+  "read_all": "Mark all as read",
+  "preferences": "Delivery preferences",
+  "database": "In-app",
+  "mail": "Email"
+}

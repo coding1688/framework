@@ -1,0 +1,9 @@
+{
+  "email": "電子郵件",
+  "password": "密碼",
+  "new_password": "新密碼",
+  "password_confirmation": "確認新密碼",
+  "password_hint": "至少12位，包含大小寫字母和數字",
+  "reset_password": "重設密碼",
+  "nickname": "暱稱"
+}

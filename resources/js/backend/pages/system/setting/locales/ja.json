@@ -1,0 +1,18 @@
+{
+  "title": "システム設定",
+  "groups": "設定グループ",
+  "empty": "このグループには設定がありません。",
+  "secret_placeholder": "空欄のままにすると現在の設定を保持します",
+  "secret_configured": "設定済み",
+  "restore_pending": "保存後に復元",
+  "restore_default": "デフォルトに戻す",
+  "cancel_restore": "復元をキャンセル",
+  "secret_empty_placeholder": "値を入力",
+  "current_value": "現在の値",
+  "configure": "設定",
+  "not_configured": "未設定",
+  "yes": "はい",
+  "no": "いいえ",
+  "change_status": "ステータスを変更",
+  "status_confirmation": "「:name」のステータスを変更しますか？"
+}

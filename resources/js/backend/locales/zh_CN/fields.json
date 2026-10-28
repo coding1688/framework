@@ -1,0 +1,12 @@
+{
+  "option_source": "选项来源",
+  "registered_source": "选项集合",
+  "source_manual": "自定义选项",
+  "source_constant": "常量",
+  "source_database": "数据库数据",
+  "other_sources": "其他来源",
+  "source_unavailable": "该选项来源当前不可用。",
+  "preview_failed": "无法加载可选值。",
+  "loading_options": "正在加载可选值…",
+  "no_options": "暂无可选值。"
+}

@@ -1,0 +1,35 @@
+{
+    "$schema": "https://www.schemastore.org/package.json",
+    "private": true,
+    "type": "module",
+    "scripts": {
+        "build": "npm run build:backend && npm run build:frontend",
+        "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
+        "build:backend": "vite build --config vite.backend.config.js",
+        "dev:backend": "vite --config vite.backend.config.js",
+        "build:frontend": "vite build --config vite.frontend.config.js",
+        "dev:frontend": "vite --config vite.frontend.config.js"
+    },
+    "devDependencies": {
+        "@tailwindcss/vite": "^4.3.3",
+        "@vitejs/plugin-vue": "^6.0.9",
+        "concurrently": "^10.0.5",
+        "laravel-vite-plugin": "^3.2.0",
+        "tailwindcss": "^4.3.3",
+        "vite": "^8.3.0"
+    },
+    "optionalDependencies": {
+        "@laravel/multiplex": "^0.4.3"
+    },
+    "dependencies": {
+        "@element-plus/icons-vue": "^2.3.2",
+        "@tiptap/extensions": "^3.32.0",
+        "@tiptap/pm": "^3.32.0",
+        "@tiptap/starter-kit": "^3.32.0",
+        "@tiptap/vue-3": "^3.32.0",
+        "element-plus": "^2.14.6",
+        "remixicon": "4.3.0",
+        "vue": "^3.5.43",
+        "vue-router": "^5.3.1"
+    }
+}

@@ -1,0 +1,12 @@
+{
+  "option_source": "Option source",
+  "registered_source": "Registered source",
+  "source_manual": "Custom options",
+  "source_constant": "Constants",
+  "source_database": "Database data",
+  "other_sources": "Other sources",
+  "source_unavailable": "This option source is unavailable.",
+  "preview_failed": "Could not load the available options.",
+  "loading_options": "Loading options…",
+  "no_options": "No available options."
+}

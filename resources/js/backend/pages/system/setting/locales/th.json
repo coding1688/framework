@@ -1,0 +1,18 @@
+{
+  "title": "การตั้งค่าระบบ",
+  "groups": "กลุ่มการตั้งค่า",
+  "empty": "ไม่มีการตั้งค่าในกลุ่มนี้",
+  "secret_placeholder": "เว้นว่างเพื่อคงการตั้งค่าปัจจุบัน",
+  "secret_configured": "ตั้งค่าแล้ว",
+  "restore_pending": "คืนค่าหลังบันทึก",
+  "restore_default": "คืนค่าเริ่มต้น",
+  "cancel_restore": "ยกเลิกการคืนค่า",
+  "secret_empty_placeholder": "ป้อนค่า",
+  "current_value": "ค่าปัจจุบัน",
+  "configure": "ตั้งค่า",
+  "not_configured": "ยังไม่ได้ตั้งค่า",
+  "yes": "ใช่",
+  "no": "ไม่",
+  "change_status": "เปลี่ยนสถานะ",
+  "status_confirmation": "เปลี่ยนสถานะของ “:name” หรือไม่"
+}

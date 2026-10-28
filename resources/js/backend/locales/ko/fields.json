@@ -1,0 +1,12 @@
+{
+  "option_source": "옵션 소스",
+  "registered_source": "등록된 소스",
+  "source_manual": "사용자 지정 옵션",
+  "source_constant": "상수",
+  "source_database": "데이터베이스 데이터",
+  "other_sources": "기타 소스",
+  "source_unavailable": "이 옵션 소스는 사용할 수 없습니다.",
+  "preview_failed": "사용 가능한 옵션을 불러오지 못했습니다.",
+  "loading_options": "옵션 로드 중…",
+  "no_options": "사용 가능한 옵션이 없습니다."
+}

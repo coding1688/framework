@@ -1,0 +1,48 @@
+<?php
+
+return [
+    'required' => ':attribute은(는) 필수입니다.',
+    'string' => ':attribute은(는) 문자열이어야 합니다.',
+    'email' => ':attribute은(는) 유효한 이메일 주소여야 합니다.',
+    'integer' => ':attribute은(는) 정수여야 합니다.',
+    'boolean' => ':attribute은(는) 유효한 상태여야 합니다.',
+    'array' => ':attribute은(는) 유효한 목록이어야 합니다.',
+    'exists' => '선택한 :attribute이(가) 존재하지 않습니다.',
+    'unique' => ':attribute은(는) 이미 사용 중입니다.',
+    'in' => '선택한 :attribute이(가) 유효하지 않습니다.',
+    'regex' => ':attribute 형식이 유효하지 않습니다.',
+    'distinct' => ':attribute에 중복이 있습니다.',
+    'present' => ':attribute은(는) 반드시 있어야 합니다.',
+    'prohibited' => ':attribute은(는) 설정할 수 없습니다.',
+    'confirmed' => ':attribute 확인이 일치하지 않습니다.',
+    'min' => [
+        'string' => ':attribute은(는) 최소 :min자여야 합니다.',
+        'numeric' => ':attribute은(는) :min 이상이어야 합니다.',
+    ],
+    'max' => [
+        'string' => ':attribute은(는) :max자를 초과할 수 없습니다.',
+        'numeric' => ':attribute은(는) :max을(를) 초과할 수 없습니다.',
+        'array' => ':attribute은(는) :max개를 초과할 수 없습니다.',
+    ],
+    'password' => [
+        'mixed' => ':attribute에는 대문자와 소문자가 포함되어야 합니다.',
+        'numbers' => ':attribute에는 숫자가 포함되어야 합니다.',
+    ],
+    'attributes' => [
+        'name' => '이름',
+        'email' => '이메일 주소',
+        'password' => '비밀번호',
+        'current_password' => '현재 비밀번호',
+        'active' => '활성화됨',
+        'locale' => '언어',
+        'type' => '유형',
+        'permission' => '권한 키',
+        'path' => '페이지 경로',
+        'sort' => '정렬 순서',
+        'description' => '설명',
+        'role_ids' => '역할',
+        'menu_ids' => '페이지 및 버튼 권한',
+        'parent_id' => '상위 항목',
+        'department_id' => '부서',
+    ],
+];

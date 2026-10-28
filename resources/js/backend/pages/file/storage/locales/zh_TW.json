@@ -1,0 +1,20 @@
+{
+  "storages": "儲存帳號", "upload_rules": "上傳規則", "synchronization": "儲存同步",
+  "name": "顯示名稱", "disk": "儲存識別碼", "location": "儲存桶 / 目錄", "default": "預設儲存",
+  "enabled": "已啟用", "disabled": "未啟用 / 設定不完整", "max_upload_mb": "上傳大小上限（MB）", "extensions": "允許上傳的副檔名",
+  "size_hint": "設為 0 禁止上傳；PHP 與 Web 伺服器的限制仍然生效。", "add_extension": "新增副檔名",
+  "directory": "本機目錄", "directory_hint": "相對於 storage/app；公開存取需要設定 Web 伺服器對應，既有 /storage 網址請使用內建本機公開儲存。",
+  "bucket": "儲存桶", "region": "區域", "endpoint": "S3 API 網址", "public_url": "公開存取網址", "path_style": "使用路徑形式的端點",
+  "keep_secret": "已設定；留空保留原值", "r2_hint": "R2 區域填寫 auto。公開圖片需在 Cloudflare 連接自訂網域或啟用開發用 r2.dev 網址；此公開選項不會自動開放儲存桶。",
+  "storage_hint": "金鑰加密保存且不回傳。切換預設儲存只影響新上傳檔案，不改變既有檔案網址。",
+  "sync_hint": "僅單向複製平台登記的檔案，保留來源及既有網址；使用 SHA-256 驗證，不覆寫內容衝突的檔案，也不允許私有檔案同步到公開儲存。",
+  "sync_confirm": "確認複製已登記檔案到目標儲存？來源檔案及既有圖片網址都會保留。",
+  "source": "來源儲存", "target": "目標儲存", "start_sync": "開始同步", "queued": "同步工作已排入佇列",
+  "worker_hint": "需要執行佇列處理程序：", "direction": "同步方向", "progress": "進度", "counts": "成功 / 略過 / 失敗", "total": "總數",
+  "pending": "等待處理", "running": "同步中", "completed": "已完成", "failed": "失敗", "retry": "重試", "synced_at": "同步時間",
+  "file_copy_failed": "複製失敗。請檢查來源檔案、目標憑證、公開性與驗證衝突後重試。",
+  "worker_failed": "處理程序異常或逾時，請檢查佇列程序後重試。",
+  "storage_disabled": "來源或目標儲存已停用。", "visibility_mismatch": "來源檔案與目標儲存的公開性不一致。",
+  "destination_conflict": "目標同路徑已有不同內容的檔案，未覆寫。",
+  "source_checksum_mismatch": "來源檔案內容與登記的驗證值不一致。", "destination_checksum_mismatch": "複製後的檔案驗證未通過。"
+}

@@ -1,0 +1,48 @@
+<?php
+
+return [
+    'required' => ':attribute は必須です。',
+    'string' => ':attribute は文字列で入力してください。',
+    'email' => ':attribute は有効なメールアドレスで入力してください。',
+    'integer' => ':attribute は整数で入力してください。',
+    'boolean' => ':attribute は有効なステータスで入力してください。',
+    'array' => ':attribute は有効なリストで入力してください。',
+    'exists' => '選択した :attribute は存在しません。',
+    'unique' => ':attribute は既に使用されています。',
+    'in' => '選択した :attribute は無効です。',
+    'regex' => ':attribute の形式が正しくありません。',
+    'distinct' => ':attribute に重複があります。',
+    'present' => ':attribute は必須です。',
+    'prohibited' => ':attribute は設定できません。',
+    'confirmed' => ':attribute の確認が一致しません。',
+    'min' => [
+        'string' => ':attribute は :min 文字以上で入力してください。',
+        'numeric' => ':attribute は :min 以上で入力してください。',
+    ],
+    'max' => [
+        'string' => ':attribute は :max 文字以内で入力してください。',
+        'numeric' => ':attribute は :max 以下で入力してください。',
+        'array' => ':attribute は :max 件以内で入力してください。',
+    ],
+    'password' => [
+        'mixed' => ':attribute には英大文字と英小文字を含めてください。',
+        'numbers' => ':attribute には数字を含めてください。',
+    ],
+    'attributes' => [
+        'name' => '名前',
+        'email' => 'メールアドレス',
+        'password' => 'パスワード',
+        'current_password' => '現在のパスワード',
+        'active' => '有効',
+        'locale' => '言語',
+        'type' => '種類',
+        'permission' => '権限キー',
+        'path' => 'ページパス',
+        'sort' => '並び順',
+        'description' => '説明',
+        'role_ids' => 'ロール',
+        'menu_ids' => 'ページとボタンの権限',
+        'parent_id' => '親',
+        'department_id' => '部門',
+    ],
+];

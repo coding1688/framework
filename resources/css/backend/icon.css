@@ -1,0 +1,17 @@
+@import 'remixicon/fonts/remixicon.css';
+
+.app-icon {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    width: 1em;
+    height: 1em;
+    line-height: 1;
+    vertical-align: -0.125em;
+}
+.app-icon > i { font-style: normal; line-height: 1; }
+.app-icon > svg { width: 100%; height: 100%; fill: currentColor; }
+.app-icon-spin { animation: app-icon-spin 1s linear infinite; }
+@keyframes app-icon-spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .app-icon-spin { animation: none; } }

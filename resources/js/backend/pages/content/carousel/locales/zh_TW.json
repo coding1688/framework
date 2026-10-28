@@ -1,0 +1,11 @@
+{
+  "title": "輪播標題",
+  "search_placeholder": "搜尋輪播標題",
+  "image": "輪播圖片",
+  "link_url": "跳轉連結",
+  "link_placeholder": "https://example.com 或 /path",
+  "upload_image": "上傳圖片",
+  "replace_image": "替換圖片",
+  "uploaded": "圖片上傳成功",
+  "upload_hint": "支援 JPG、PNG、GIF、WebP，大小遵循儲存配置。"
+}

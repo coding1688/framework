@@ -1,0 +1,8 @@
+{
+  "center": "通知センター",
+  "unread": "未読 {count} 件",
+  "read_all": "すべて既読",
+  "preferences": "受信設定",
+  "database": "アプリ内",
+  "mail": "メール"
+}

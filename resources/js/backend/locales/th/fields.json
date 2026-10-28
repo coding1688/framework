@@ -1,0 +1,12 @@
+{
+  "option_source": "แหล่งตัวเลือก",
+  "registered_source": "แหล่งที่ลงทะเบียน",
+  "source_manual": "ตัวเลือกกำหนดเอง",
+  "source_constant": "ค่าคงที่",
+  "source_database": "ข้อมูลฐานข้อมูล",
+  "other_sources": "แหล่งอื่น ๆ",
+  "source_unavailable": "แหล่งตัวเลือกนี้ไม่พร้อมใช้งาน",
+  "preview_failed": "ไม่สามารถโหลดตัวเลือกที่มีได้",
+  "loading_options": "กำลังโหลดตัวเลือก…",
+  "no_options": "ไม่มีตัวเลือกที่พร้อมใช้งาน"
+}

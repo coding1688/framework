@@ -1,0 +1,48 @@
+<?php
+
+return [
+    'required' => ':attribute 為必填項。',
+    'string' => ':attribute 必須為文字。',
+    'email' => ':attribute 必須為有效電子郵件。',
+    'integer' => ':attribute 必須為整數。',
+    'boolean' => ':attribute 必須為有效狀態。',
+    'array' => ':attribute 必須為有效清單。',
+    'exists' => ':attribute 所選紀錄不存在。',
+    'unique' => ':attribute 已被使用。',
+    'in' => ':attribute 不在允許範圍內。',
+    'regex' => ':attribute 格式不正確。',
+    'distinct' => ':attribute 不能重複。',
+    'present' => '必須提供 :attribute。',
+    'prohibited' => '不允許設定 :attribute。',
+    'confirmed' => ':attribute 兩次輸入不一致。',
+    'min' => [
+        'string' => ':attribute 至少需要 :min 個字元。',
+        'numeric' => ':attribute 不能小於 :min。',
+    ],
+    'max' => [
+        'string' => ':attribute 不能超過 :max 個字元。',
+        'numeric' => ':attribute 不能超過 :max。',
+        'array' => ':attribute 不能超過 :max 項。',
+    ],
+    'password' => [
+        'mixed' => ':attribute 必須包含大小寫字母。',
+        'numbers' => ':attribute 必須包含數字。',
+    ],
+    'attributes' => [
+        'name' => '名稱',
+        'email' => '電子郵件',
+        'password' => '密碼',
+        'current_password' => '目前密碼',
+        'active' => '啟用',
+        'locale' => '介面語言',
+        'type' => '類型',
+        'permission' => '權限識別碼',
+        'path' => '頁面路徑',
+        'sort' => '排序',
+        'description' => '說明',
+        'role_ids' => '所屬角色',
+        'menu_ids' => '頁面與按鈕授權',
+        'parent_id' => '上層',
+        'department_id' => '所屬部門',
+    ],
+];

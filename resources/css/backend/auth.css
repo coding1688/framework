@@ -1,0 +1,73 @@
+.spa-login {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    min-height: 100vh;
+    min-width: 900px;
+    background: white;
+}
+.login-story {
+    background: #e8f1eb;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 35px 55px;
+    position: relative;
+    overflow: hidden;
+}
+.login-story .spa-brand {
+    padding: 0;
+    z-index: 1;
+}
+.login-story h1 {
+    font-size: 36px;
+    line-height: 1.3;
+    max-width: 500px;
+    color: #254e3c;
+}
+.login-story p {
+    color: #708c7b;
+    max-width: 390px;
+    line-height: 1.8;
+}
+.login-story>div {
+    z-index: 1;
+}
+.login-orbit {
+    width: 440px;
+    height: 440px;
+    border: 75px solid #d7e8dd;
+    border-radius: 50%;
+    position: absolute;
+    bottom: -240px;
+    right: -120px;
+    z-index: 0!important;
+}
+.login-panel {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px;
+}
+.login-panel .el-card {
+    width: 400px;
+    border: 0;
+}
+.login-panel .el-card__body {
+    padding: 0;
+}
+.login-panel h2 {
+    font-size: 25px;
+    margin: 0 0 10px;
+}
+.login-panel .el-form {
+    margin-top: 26px;
+}
+.login-panel .el-select {
+    margin-top: 22px;
+    width: 100%;
+}
+.login-note {
+    font-size: 12px;
+    line-height: 1.7;
+    margin-top: 20px;
+}

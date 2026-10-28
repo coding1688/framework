@@ -1,0 +1,1 @@
+{"pending":"等待中","reserved":"处理中","failed":"失败任务","jobs":"队列任务","name":"任务","queue":"队列","attempts":"尝试次数","exception":"异常","retry":"重试","retry_batch":"批量重试","failure_detail":"失败详情"}

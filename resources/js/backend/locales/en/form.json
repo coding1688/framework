@@ -1,0 +1,9 @@
+{
+  "email": "Email address",
+  "password": "Password",
+  "new_password": "New password",
+  "password_confirmation": "Confirm new password",
+  "password_hint": "At least 12 characters with uppercase, lowercase and numbers",
+  "reset_password": "Reset password",
+  "nickname": "Nickname"
+}

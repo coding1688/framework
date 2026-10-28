@@ -1,0 +1,12 @@
+{
+  "option_source": "オプションソース",
+  "registered_source": "登録済みソース",
+  "source_manual": "カスタムオプション",
+  "source_constant": "定数",
+  "source_database": "データベースデータ",
+  "other_sources": "その他のソース",
+  "source_unavailable": "このオプションソースは利用できません。",
+  "preview_failed": "利用可能なオプションを読み込めませんでした。",
+  "loading_options": "オプションを読み込み中…",
+  "no_options": "利用可能なオプションがありません。"
+}

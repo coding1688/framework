@@ -1,0 +1,48 @@
+<?php
+
+return [
+    'required' => ':attribute 为必填项。',
+    'string' => ':attribute 必须是文本。',
+    'email' => ':attribute 必须为有效邮箱。',
+    'integer' => ':attribute 必须为整数。',
+    'boolean' => ':attribute 必须为有效状态。',
+    'array' => ':attribute 必须为有效列表。',
+    'exists' => ':attribute 所选记录不存在。',
+    'unique' => ':attribute 已被使用。',
+    'in' => ':attribute 不在允许范围内。',
+    'regex' => ':attribute 格式不正确。',
+    'distinct' => ':attribute 不能重复。',
+    'present' => '必须提供 :attribute。',
+    'prohibited' => '不允许设置 :attribute。',
+    'confirmed' => ':attribute 两次输入不一致。',
+    'min' => [
+        'string' => ':attribute 至少需要 :min 个字符。',
+        'numeric' => ':attribute 不能小于 :min。',
+    ],
+    'max' => [
+        'string' => ':attribute 不能超过 :max 个字符。',
+        'numeric' => ':attribute 不能超过 :max。',
+        'array' => ':attribute 不能超过 :max 项。',
+    ],
+    'password' => [
+        'mixed' => ':attribute 必须包含大小写字母。',
+        'numbers' => ':attribute 必须包含数字。',
+    ],
+    'attributes' => [
+        'name' => '名称',
+        'email' => '邮箱地址',
+        'password' => '密码',
+        'current_password' => '当前密码',
+        'active' => '启用',
+        'locale' => '界面语言',
+        'type' => '类型',
+        'permission' => '权限标识',
+        'path' => '页面路径',
+        'sort' => '排序',
+        'description' => '说明',
+        'role_ids' => '所属角色',
+        'menu_ids' => '页面与按钮授权',
+        'parent_id' => '上级',
+        'department_id' => '所属部门',
+    ],
+];

@@ -1,0 +1,9 @@
+{
+  "email": "メールアドレス",
+  "password": "パスワード",
+  "new_password": "新しいパスワード",
+  "password_confirmation": "新しいパスワードの確認",
+  "password_hint": "英大文字、英小文字、数字を含む 12 文字以上",
+  "reset_password": "パスワードをリセット",
+  "nickname": "ニックネーム"
+}
