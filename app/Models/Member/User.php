@@ -4,6 +4,7 @@ namespace App\Models\Member;
 
 use App\Libs\File\Concerns\HasFileReferences;
 use App\Notifications\ResetUserPasswordNotification;
+use App\Services\Member\UserRestrictionService;
 use Database\Factories\Member\UserFactory;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
@@ -12,10 +13,11 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
-#[Fillable(['username', 'name', 'email', 'password', 'avatar_url'])]
+#[Fillable(['username', 'name', 'email', 'password', 'avatar_url', 'is_test', 'remark', 'locale', 'default_currency'])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable implements MustVerifyEmail
 {
@@ -24,14 +26,14 @@ class User extends Authenticatable implements MustVerifyEmail
 
     protected $appends = ['avatar'];
 
-    protected $attributes = ['active' => true, 'auth_version' => 1];
+    protected $attributes = ['active' => true, 'is_test' => false, 'auth_version' => 1];
 
     protected function casts(): array
     {
         return [
             'email_verified_at' => 'datetime', 'password' => 'hashed', 'vip_level' => 'integer',
-            'active' => 'boolean', 'last_login_at' => 'datetime', 'password_changed_at' => 'datetime',
-            'notification_preferences' => 'array', 'vip_started_at' => 'datetime', 'vip_expires_at' => 'datetime',
+            'active' => 'boolean', 'is_test' => 'boolean', 'last_login_at' => 'datetime', 'password_changed_at' => 'datetime',
+            'vip_started_at' => 'datetime', 'vip_expires_at' => 'datetime',
         ];
     }
 
@@ -45,6 +47,26 @@ class User extends Authenticatable implements MustVerifyEmail
         return ['avatar_url'];
     }
 
+    public function canAuthenticate(): bool
+    {
+        return $this->active && app(UserRestrictionService::class)->allows($this, 'authentication');
+    }
+
+    public function profile(): HasOne
+    {
+        return $this->hasOne(UserProfile::class);
+    }
+
+    public function restrictions(): HasMany
+    {
+        return $this->hasMany(UserRestriction::class);
+    }
+
+    public function activeFreeze(): HasOne
+    {
+        return $this->hasOne(UserRestriction::class)->where('type', UserRestriction::TYPE_FREEZE)->whereNull('lifted_at')->orderByDesc('id');
+    }
+
     public function vipLevel(): BelongsTo
     {
         return $this->belongsTo(MemberVipLevel::class, 'vip_level_id');
@@ -53,6 +75,21 @@ class User extends Authenticatable implements MustVerifyEmail
     public function vipRecords(): HasMany
     {
         return $this->hasMany(MemberVipRecord::class);
+    }
+
+    protected function name(): Attribute
+    {
+        return Attribute::get(fn (): string => $this->profile?->nickname ?? ($this->attributes['name'] ?? ''));
+    }
+
+    protected function avatarUrl(): Attribute
+    {
+        return Attribute::get(fn (): ?string => $this->profile?->avatar_url ?? ($this->attributes['avatar_url'] ?? null));
+    }
+
+    protected function notificationPreferences(): Attribute
+    {
+        return Attribute::get(fn (): array => $this->profile?->notification_preferences ?? ($this->attributes['notification_preferences'] ?? []));
     }
 
     protected function effectiveVipLevel(): Attribute
@@ -82,5 +119,15 @@ class User extends Authenticatable implements MustVerifyEmail
     public function socialAccounts(): HasMany
     {
         return $this->hasMany(SocialAccount::class);
+    }
+
+    public function logs(): HasMany
+    {
+        return $this->hasMany(UserLog::class);
+    }
+
+    public function wallets(): HasMany
+    {
+        return $this->hasMany(MemberWallet::class);
     }
 }

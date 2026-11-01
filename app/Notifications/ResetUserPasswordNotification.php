@@ -18,7 +18,7 @@ class ResetUserPasswordNotification extends Notification
 
     public function toMail(object $notifiable): MailMessage
     {
-        $url = route('frontend.home', ['token' => $this->token, 'email' => $notifiable->email]);
+        $url = route('frontend.auth.reset', ['token' => $this->token, 'email' => $notifiable->email]);
         $message = (new MailMessage)
             ->subject(__('auth.password_reset_subject'))
             ->line(__('auth.password_reset_intro'))

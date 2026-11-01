@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Libs\File\Constants\FileType;
 use App\Libs\File\FileManager;
+use App\Libs\File\FileReferences;
 use App\Models\Admin\AdminDepartment;
 use App\Models\Admin\AdminLog;
 use App\Models\Admin\AdminUser;
@@ -135,7 +136,8 @@ class FileManagerTest extends TestCase
     private function avatarFile(User $user): File
     {
         $file = app(FileManager::class)->store(UploadedFile::fake()->create('old.jpg', 12, 'image/jpeg'), 'public', FileType::UserAvatar->value, 'public');
-        $user->forceFill(['avatar_url' => $file->publicUrl()])->save();
+        $user->profile->forceFill(['avatar_url' => $file->publicUrl()])->save();
+        app(FileReferences::class)->syncModel($user);
 
         return $file;
     }

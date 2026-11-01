@@ -9,6 +9,8 @@ use App\Libs\File\UploadConfiguration;
 use App\Libs\Notifications\NotificationManager;
 use App\Models\Common\File;
 use App\Models\Member\User;
+use App\Services\Member\UserLogService;
+use App\Services\Member\UserRestrictionService;
 use Illuminate\Auth\Events\Verified;
 use Illuminate\Contracts\Session\Session;
 use Illuminate\Http\UploadedFile;
@@ -20,21 +22,26 @@ use Illuminate\Validation\ValidationException;
 
 class AuthService extends BaseService
 {
-    public function __construct(private readonly Session $session, private readonly FileManager $files, private readonly UploadConfiguration $uploads, private readonly NotificationManager $notifications, private readonly FileReferences $fileReferences) {}
+    public function __construct(private readonly Session $session, private readonly FileManager $files, private readonly UploadConfiguration $uploads, private readonly NotificationManager $notifications, private readonly FileReferences $fileReferences, private readonly UserLogService $userLogs, private readonly UserRestrictionService $restrictionService) {}
 
     public function register(array $validated): User
     {
-        $user = DB::transaction(fn (): User => User::create([
-            'username' => $validated['username'],
-            'name' => $validated['name'] ?? $validated['username'],
-            'email' => strtolower($validated['email']),
-            'password' => $validated['password'],
-            'vip_level' => 0,
-        ]));
+        $user = DB::transaction(function () use ($validated): User {
+            $user = User::create([
+                'username' => $validated['username'],
+                'email' => strtolower($validated['email']),
+                'password' => $validated['password'],
+                'vip_level' => 0,
+            ]);
+            $user->profile()->create(['nickname' => $validated['name'] ?? $validated['username']]);
+
+            return $user;
+        });
         $user->sendEmailVerificationNotification();
         Auth::guard('web')->login($user);
         $this->session->regenerate();
         $this->session->put('web.auth_version', $user->auth_version);
+        $this->userLogs->record($user, 'auth.register');
 
         return $user;
     }
@@ -43,7 +50,10 @@ class AuthService extends BaseService
     {
         $identity = trim($validated['login']);
         $user = User::where('username', $identity)->orWhere('email', strtolower($identity))->first();
-        if (! $user || ! $user->active || ! $user->password || ! Hash::check($validated['password'], $user->password)) {
+        if (! $user || ! $user->canAuthenticate() || ! $user->password || ! Hash::check($validated['password'], $user->password)) {
+            if ($user) {
+                $this->userLogs->record($user, 'auth.login_failed');
+            }
             throw ValidationException::withMessages(['login' => __('auth.failed')]);
         }
         Auth::guard('web')->login($user);
@@ -52,7 +62,9 @@ class AuthService extends BaseService
         $user->forceFill([
             'last_login_at' => now(), 'last_login_ip' => $ip,
             'last_login_device' => $userAgent ? mb_substr($userAgent, 0, 512) : null,
+            'last_login_device_type' => $this->userLogs->deviceType($userAgent),
         ])->save();
+        $this->userLogs->record($user, 'auth.login');
 
         return $user;
     }
@@ -79,15 +91,18 @@ class AuthService extends BaseService
             throw ValidationException::withMessages(['email' => [__($status)]]);
         }
         $this->notifications->send($resetUser, 'security.password_reset');
+        $this->userLogs->record($resetUser, 'security.password_reset');
 
         return $resetUser;
     }
 
     public function profile(User $user, array $validated): User
     {
-        $user->fill($validated)->save();
+        $user->fill(['username' => $validated['username']])->save();
+        $user->profile->fill(['nickname' => $validated['name']])->save();
+        $this->userLogs->record($user, 'profile.updated', context: ['fields' => array_keys($validated)]);
 
-        return $user->fresh()->load('socialAccounts');
+        return $user->fresh()->load(['profile', 'socialAccounts']);
     }
 
     public function password(User $user, array $validated): string
@@ -102,6 +117,7 @@ class AuthService extends BaseService
         $this->notifications->send($user, 'security.password_changed');
         $this->session->put('web.auth_version', $user->auth_version);
         $this->session->regenerate();
+        $this->userLogs->record($user, 'security.password_changed');
 
         return $this->session->token();
     }
@@ -114,13 +130,14 @@ class AuthService extends BaseService
         $user->forceFill(['email' => strtolower($validated['email']), 'email_verified_at' => null])->save();
         $this->notifications->send($user, 'security.email_changed', ['email' => $user->email]);
         $user->sendEmailVerificationNotification();
+        $this->userLogs->record($user, 'security.email_changed');
 
         return $user->fresh()->load('socialAccounts');
     }
 
     public function avatar(User $user, UploadedFile $uploaded): User
     {
-        return DB::transaction(function () use ($user, $uploaded): User {
+        $user = DB::transaction(function () use ($user, $uploaded): User {
             $oldFileId = $this->fileReferences->idsFromUrls($user->avatar_url)[0] ?? null;
             $oldFile = $oldFileId === null ? null : File::find($oldFileId);
             $file = $this->files->store($uploaded, $this->uploads->publicDisk(), FileType::UserAvatar->value, 'public');
@@ -128,17 +145,30 @@ class AuthService extends BaseService
             if (! is_string($url) || $url === '') {
                 throw ValidationException::withMessages(['avatar' => __('common/file/const.no_public_storage')]);
             }
-            $user->forceFill(['avatar_url' => mb_substr($url, 0, 512)])->save();
+            $user->profile->forceFill(['avatar_url' => mb_substr($url, 0, 512)])->save();
+            $this->fileReferences->syncModel($user);
             if ($oldFile !== null && ! $oldFile->references()->exists()) {
                 $this->files->delete($oldFile);
             }
 
-            return $user->fresh()->load('socialAccounts');
+            return $user->fresh()->load(['profile', 'socialAccounts']);
         });
+        $this->userLogs->record($user, 'profile.avatar_updated');
+
+        return $user;
+    }
+
+    public function restriction(User $user, string $type): array
+    {
+        return ['type' => $type, 'restricted' => $this->restrictionService->has($user, $type)];
     }
 
     public function logout(): void
     {
+        $user = Auth::guard('web')->user();
+        if ($user) {
+            $this->userLogs->record($user, 'auth.logout');
+        }
         Auth::guard('web')->logout();
         $this->session->invalidate();
         $this->session->regenerateToken();
@@ -148,6 +178,7 @@ class AuthService extends BaseService
     {
         if (! $user->hasVerifiedEmail()) {
             $user->sendEmailVerificationNotification();
+            $this->userLogs->record($user, 'security.verification_sent');
         }
     }
 
@@ -159,6 +190,7 @@ class AuthService extends BaseService
             $user->markEmailAsVerified();
             $user->save();
             event(new Verified($user));
+            $this->userLogs->record($user, 'security.email_verified');
         }
 
         return $user;

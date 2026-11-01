@@ -22,6 +22,7 @@ class SystemSettingSeeder extends Seeder
             'schedule' => ['Scheduling', '计划任务', '排程任務', 'งานตามกำหนดเวลา', 'スケジュール', '스ケジュール'],
             'ai' => ['AI', 'AI 配置', 'AI 設定', 'การตั้งค่า AI', 'AI 設定', 'AI 설정'],
             'mail' => ['Email', '邮件配置', '郵件設定', 'อีเมล', 'メール', '이메일'],
+            'member' => ['Member', '会员配置', '會員配置', 'การตั้งค่าสมาชิก', '会員設定', '회원 설정'],
         ];
         $models = [];
         foreach ($groups as $code => $labels) {
@@ -54,6 +55,10 @@ class SystemSettingSeeder extends Seeder
             ['mail', 'mail.from.address', ['From email address', '发件人邮箱', '寄件者信箱', 'อีเมลผู้ส่ง', '送信者メールアドレス', '발신자 이메일'], 'text', null, ['min_length' => 1, 'max_length' => 256]],
             ['mail', 'mail.from.name', ['From name', '发件人名称', '寄件者名稱', 'ชื่อผู้ส่ง', '送信者名', '발신자 이름'], 'text', ['value_string' => 'Framework'], ['min_length' => 1, 'max_length' => 128]],
             ['mail', 'mail.smtp.timeout', ['SMTP timeout (seconds)', 'SMTP 超时（秒）', 'SMTP 逾時（秒）', 'เวลาหมดเขต SMTP (วินาที)', 'SMTP タイムアウト（秒）', 'SMTP 시간 초과(초)'], 'number', ['value_number' => 15], ['precision' => 0, 'min_value' => 1, 'max_value' => 120]],
+            ['member', 'member.wallet.main_currency', ['Main wallet currency', '主钱包币种', '主錢包幣種', 'สกุลเงินกระเป๋าหลัก', 'メインウォレット通貨', '주 지갑 통화'], 'select', ['value_string' => 'RMB'], [], [
+                'en' => ['RMB' => 'RMB', 'USDT' => 'USDT'], 'zh_CN' => ['RMB' => 'RMB', 'USDT' => 'USDT'], 'zh_TW' => ['RMB' => 'RMB', 'USDT' => 'USDT'],
+                'th' => ['RMB' => 'RMB', 'USDT' => 'USDT'], 'ja' => ['RMB' => 'RMB', 'USDT' => 'USDT'], 'ko' => ['RMB' => 'RMB', 'USDT' => 'USDT'],
+            ]],
         ];
         $fields = app(FieldRegistry::class);
         foreach ($definitions as $sort => $definition) {

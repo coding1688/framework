@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\EmailVerificationController;
+use App\Http\Controllers\Api\MemberWalletController;
 use App\Http\Controllers\Api\NotificationController;
 use App\Http\Controllers\Api\SocialAuthController;
 use App\Http\Controllers\Frontend\PageController;
@@ -20,6 +21,7 @@ Route::domain(config('platform.frontend_domain'))->prefix('api/v1/auth')->group(
     Route::middleware('frontend.auth')->group(function (): void {
         Route::post('logout', [AuthController::class, 'logout'])->name('logout');
         Route::get('user', [AuthController::class, 'user'])->name('user');
+        Route::get('restrictions/{type}', [AuthController::class, 'restriction'])->name('restriction.check');
         Route::post('profile', [AuthController::class, 'profile'])->name('profile.update');
         Route::post('password', [AuthController::class, 'password'])->middleware('throttle:10,1')->name('password.update');
         Route::post('email', [AuthController::class, 'email'])->middleware('throttle:6,1')->name('email.update');
@@ -39,4 +41,12 @@ Route::domain(config('platform.frontend_domain'))->prefix('api/v1/notifications'
     Route::post('preferences', 'preferences')->name('preferences');
 });
 
+Route::domain(config('platform.frontend_domain'))->prefix('api/v1/wallets')->name('wallets.')->middleware('frontend.auth')->controller(MemberWalletController::class)->group(function (): void {
+    Route::get('list', 'list')->name('list');
+    Route::get('history', 'history')->name('history');
+    Route::get('statistics', 'statistics')->name('statistics');
+});
+
 Route::domain(config('platform.frontend_domain'))->get('/', PageController::class)->name('frontend.home');
+Route::domain(config('platform.frontend_domain'))->get('/auth/reset', PageController::class)->name('frontend.auth.reset');
+Route::domain(config('platform.frontend_domain'))->get('/{path}', PageController::class)->where('path', '^(?!api/).*$')->name('frontend.page');

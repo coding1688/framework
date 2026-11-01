@@ -67,4 +67,9 @@ class AuthController extends BaseController
     {
         return apiSuccess(new UserResource($request->user()));
     }
+
+    public function restriction(Request $request, string $type): JsonResponse
+    {
+        return apiSuccess($this->service->restriction($request->user(), $type));
+    }
 }

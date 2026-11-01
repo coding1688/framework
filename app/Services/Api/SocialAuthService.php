@@ -4,6 +4,7 @@ namespace App\Services\Api;
 
 use App\Models\Member\SocialAccount;
 use App\Models\Member\User;
+use App\Services\Member\UserLogService;
 use Illuminate\Contracts\Session\Session;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -14,7 +15,7 @@ use Symfony\Component\HttpKernel\Exception\ServiceUnavailableHttpException;
 
 class SocialAuthService extends BaseService
 {
-    public function __construct(private readonly Session $session) {}
+    public function __construct(private readonly Session $session, private readonly UserLogService $userLogs) {}
 
     public function authorizationUrl(string $provider, bool $binding = false): string
     {
@@ -41,6 +42,7 @@ class SocialAuthService extends BaseService
         Auth::guard('web')->login($user);
         $this->session->regenerate();
         $this->session->put('web.auth_version', $user->auth_version);
+        $this->userLogs->record($user, $user->wasRecentlyCreated ? 'auth.register' : 'auth.login', context: ['provider' => $provider]);
 
         return $user->load('socialAccounts');
     }
@@ -57,6 +59,7 @@ class SocialAuthService extends BaseService
             }
             SocialAccount::create(['user_id' => $user->id, 'provider' => $provider, 'provider_id' => $identity['id']]);
         });
+        $this->userLogs->record($user, 'security.oauth_bound', context: ['provider' => $provider]);
 
         return $user->fresh()->load('socialAccounts');
     }
@@ -69,6 +72,7 @@ class SocialAuthService extends BaseService
             throw ValidationException::withMessages(['provider' => __('auth.oauth_last_login')]);
         }
         $account->delete();
+        $this->userLogs->record($user, 'security.oauth_unlinked', context: ['provider' => $provider]);
 
         return $user->fresh()->load('socialAccounts');
     }
@@ -147,14 +151,14 @@ class SocialAuthService extends BaseService
     {
         $account = SocialAccount::with('user')->where('provider', $provider)->where('provider_id', $identity['id'])->first();
         if ($account) {
-            if (! $account->user->active) {
+            if (! $account->user->canAuthenticate()) {
                 throw ValidationException::withMessages(['login' => __('auth.failed')]);
             }
 
             return $account->user;
         }
         $user = User::where('email', $identity['email'])->first();
-        if ($user && ! $user->active) {
+        if ($user && ! $user->canAuthenticate()) {
             throw ValidationException::withMessages(['login' => __('auth.failed')]);
         }
         if ($user) {
@@ -162,14 +166,14 @@ class SocialAuthService extends BaseService
         }
         $user = new User([
             'username' => $this->uniqueUsername($identity['email']),
-            'name' => mb_substr($identity['name'] ?: Str::before($identity['email'], '@'), 0, 128),
             'email' => $identity['email'],
             'vip_level' => 0,
         ]);
-        $user->forceFill([
-            'avatar_url' => $user->avatar_url ?: ($identity['avatar'] ? mb_substr($identity['avatar'], 0, 512) : null),
-            'email_verified_at' => $user->email_verified_at ?: now(),
-        ])->save();
+        $user->forceFill(['email_verified_at' => $user->email_verified_at ?: now()])->save();
+        $user->profile()->create([
+            'nickname' => mb_substr($identity['name'] ?: Str::before($identity['email'], '@'), 0, 128),
+            'avatar_url' => $identity['avatar'] ? mb_substr($identity['avatar'], 0, 512) : null,
+        ]);
         SocialAccount::create(['user_id' => $user->id, 'provider' => $provider, 'provider_id' => $identity['id']]);
 
         return $user;

@@ -26,7 +26,7 @@ class NotificationService extends BaseService
 
     public function preferences(User $user, array $validated): array
     {
-        $user->forceFill(['notification_preferences' => $validated['preferences']])->save();
+        $user->profile->forceFill(['notification_preferences' => $validated['preferences']])->save();
 
         return $user->notification_preferences;
     }

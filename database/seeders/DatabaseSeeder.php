@@ -17,6 +17,6 @@ class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
-        $this->call([AdminDeparturementSeeder::class, FileStorageSeeder::class, SystemSettingSeeder::class, SystemNotificationTemplateSeeder::class, SystemScheduleSeeder::class, MemberVipSeeder::class, AdminMenuSeeder::class, AdminUserSeeder::class, PhilippineLocationSeeder::class]);
+        $this->call([UserSeeder::class, AdminDeparturementSeeder::class, FileStorageSeeder::class, SystemSettingSeeder::class, SystemNotificationTemplateSeeder::class, SystemScheduleSeeder::class, MemberVipSeeder::class, AdminMenuSeeder::class, AdminUserSeeder::class, PhilippineLocationSeeder::class]);
     }
 }

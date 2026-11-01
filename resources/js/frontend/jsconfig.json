@@ -1,0 +1,11 @@
+{
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./*"],
+      "@styles/*": ["../../css/frontend/*"]
+    }
+  },
+  "include": ["**/*.js", "**/*.vue"],
+  "exclude": ["node_modules", "public/build"]
+}

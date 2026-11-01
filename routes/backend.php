@@ -10,6 +10,7 @@ use App\Http\Controllers\Backend\Content\ContentCarouselController;
 use App\Http\Controllers\Backend\File\FileController;
 use App\Http\Controllers\Backend\File\FileStorageAccountController;
 use App\Http\Controllers\Backend\Member\MemberVipLevelController;
+use App\Http\Controllers\Backend\Member\MemberWalletController;
 use App\Http\Controllers\Backend\Member\UserController;
 use App\Http\Controllers\Backend\NotificationController;
 use App\Http\Controllers\Backend\PageController;
@@ -88,10 +89,14 @@ Route::middleware(['backend.auth', 'backend.securityPassword'])->group(function 
             Route::get('detail/{id}', 'detail')->whereNumber('id')->name('detail');
             Route::post('update/{id}', 'update')->whereNumber('id')->name('update');
             Route::post('status/{id}', 'status')->whereNumber('id')->name('status');
+            Route::post('restrictions', 'restrictions')->name('restrictions');
+            Route::get('restriction-types', 'restrictionTypes')->name('restrictionTypes');
+            Route::get('restriction/{id}/{type}', 'restriction')->whereNumber('id')->name('restriction');
             Route::post('password/{id}', 'password')->whereNumber('id')->name('password');
             Route::post('verification/{id}', 'verification')->whereNumber('id')->name('verification');
             Route::get('vip-options', 'vipOptions')->name('vipOptions');
             Route::get('vip-history/{id}', 'vipHistory')->whereNumber('id')->name('vipHistory');
+            Route::get('logs/{id}', 'logs')->whereNumber('id')->name('logs');
             Route::post('vip/{id}', 'vip')->whereNumber('id')->name('vip');
         });
 
@@ -103,6 +108,15 @@ Route::middleware(['backend.auth', 'backend.securityPassword'])->group(function 
             Route::post('update/{id}', 'update')->whereNumber('id')->name('update');
             Route::post('status/{id}', 'status')->whereNumber('id')->name('status');
             Route::post('delete/{id}', 'delete')->whereNumber('id')->name('delete');
+        });
+
+        Route::prefix('member/wallet')->name('member.wallet.')->controller(MemberWalletController::class)->group(function (): void {
+            Route::get('list', 'list')->name('list');
+            Route::get('history/{id}', 'history')->whereNumber('id')->name('history');
+            Route::get('statistics/{id}', 'statistics')->whereNumber('id')->name('statistics');
+            Route::get('options', 'options')->name('options');
+            Route::post('credit/{id}', 'credit')->whereNumber('id')->name('credit');
+            Route::post('debit/{id}', 'debit')->whereNumber('id')->name('debit');
         });
 
         Route::prefix('content')->name('content.')->group(function (): void {

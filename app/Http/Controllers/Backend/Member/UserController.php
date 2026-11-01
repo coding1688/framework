@@ -4,9 +4,11 @@ namespace App\Http\Controllers\Backend\Member;
 
 use App\Attributes\MenuAction;
 use App\Attributes\MenuPage;
+use App\Attributes\RequireSecurityPassword;
 use App\Http\Controllers\Backend\BaseController;
 use App\Http\Requests\Backend\Member\UserRequest;
 use App\Http\Resources\Backend\Member\MemberVipRecordResource;
+use App\Http\Resources\Backend\Member\UserLogResource;
 use App\Http\Resources\Backend\Member\UserResource;
 use App\Services\Backend\Member\UserService;
 use Illuminate\Http\JsonResponse;
@@ -36,13 +38,32 @@ class UserController extends BaseController
         return apiSuccess(new UserResource($this->service->update($id, $request->validated())));
     }
 
-    #[MenuAction(['en' => 'Change status', 'zh_CN' => '状态切换', 'zh_TW' => '狀態切換', 'th' => 'เปลี่ยนสถานะ', 'ja' => 'ステータス変更', 'ko' => '상태 변경'], sort: 3)]
+    #[MenuAction(['en' => 'Freeze or unfreeze', 'zh_CN' => '冻结或解冻', 'zh_TW' => '凍結或解凍', 'th' => 'ระงับหรือปลดระงับ', 'ja' => '凍結または解除', 'ko' => '동결 또는 해제'], sort: 3)]
     public function status(int $id, UserRequest $request): JsonResponse
     {
         return apiSuccess(new UserResource($this->service->status($id, $request->validated())));
     }
 
+    #[MenuAction(['en' => 'Batch restrictions', 'zh_CN' => '批量限制', 'zh_TW' => '批次限制', 'th' => 'จำกัดเป็นชุด', 'ja' => '一括制限', 'ko' => '일괄 제한'], sort: 11)]
+    public function restrictions(UserRequest $request): JsonResponse
+    {
+        return apiSuccess($this->service->restrictions($request->validated()));
+    }
+
+    #[MenuAction(['en' => 'Restriction types', 'zh_CN' => '限制类型', 'zh_TW' => '限制類型', 'th' => 'ประเภทข้อจำกัด', 'ja' => '制限タイプ', 'ko' => '제한 유형'], sort: 12)]
+    public function restrictionTypes(): JsonResponse
+    {
+        return apiSuccess($this->service->restrictionTypes());
+    }
+
+    #[MenuAction(['en' => 'Check restriction', 'zh_CN' => '查询限制', 'zh_TW' => '查詢限制', 'th' => 'ตรวจสอบข้อจำกัด', 'ja' => '制限確認', 'ko' => '제한 확인'], sort: 13)]
+    public function restriction(int $id, string $type): JsonResponse
+    {
+        return apiSuccess($this->service->restriction($id, $type));
+    }
+
     #[MenuAction(['en' => 'Reset password', 'zh_CN' => '重置密码', 'zh_TW' => '重設密碼', 'th' => 'รีเซ็ตรหัสผ่าน', 'ja' => 'パスワード再設定', 'ko' => '비밀번호 재설정'], sort: 4)]
+    #[RequireSecurityPassword(mode: 'dialog')]
     public function password(int $id, UserRequest $request): JsonResponse
     {
         $this->service->password($id, $request->validated());
@@ -76,5 +97,13 @@ class UserController extends BaseController
         $page = $this->service->vipHistory($id, $request->validated());
 
         return apiPaginate($page, MemberVipRecordResource::collection($page));
+    }
+
+    #[MenuAction(['en' => 'Logs', 'zh_CN' => '日志', 'zh_TW' => '日誌', 'th' => 'บันทึก', 'ja' => 'ログ', 'ko' => '로그'], sort: 9)]
+    public function logs(int $id, UserRequest $request): JsonResponse
+    {
+        $page = $this->service->logs($id, $request->validated());
+
+        return apiPaginate($page, UserLogResource::collection($page));
     }
 }

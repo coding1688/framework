@@ -1,59 +1,61 @@
 <script setup>
-import { reactive, ref } from 'vue';
+import { computed, reactive, ref } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 import { authApi } from '../api';
+import { useSession } from '@/shared/composables/useSession';
+import FeedbackMessage from '@/shared/components/FeedbackMessage.vue';
 
-const props = defineProps({ initialMode: { type: String, default: 'login' } });
-const emit = defineEmits(['authenticated']);
-const query = new URLSearchParams(location.search);
-const mode = ref(props.initialMode);
+const route = useRoute(), router = useRouter();
+const { setUser } = useSession();
+const mode = computed(() => route.meta.mode || 'login');
 const busy = ref(false), error = ref(''), notice = ref(''), fields = ref({});
 const loginForm = reactive({ login: '', password: '' });
 const registerForm = reactive({ username: '', name: '', email: '', password: '', password_confirmation: '' });
-const recoveryForm = reactive({ email: query.get('email') || '', token: query.get('token') || '', password: '', password_confirmation: '' });
+const recoveryForm = reactive({ email: route.query.email || '', token: route.query.token || '', password: '', password_confirmation: '' });
 const oauth = window.frontendConfig?.oauth || {};
+const headings = {
+    login: ['欢迎回来', '使用你的账户继续。'],
+    register: ['创建你的账号', '注册后即可进入个人工作台。'],
+    forgot: ['找回账户密码', '输入邮箱，我们将发送重置链接。'],
+    reset: ['设置新密码', '请设置一个新的账户密码。'],
+};
+const heading = computed(() => headings[mode.value]);
 
 function fieldError(name) { return fields.value[name]?.[0] || ''; }
 function clearFeedback() { error.value = ''; notice.value = ''; fields.value = {}; }
-function switchMode(value) { mode.value = value; clearFeedback(); }
-function handleFailure(exception) { fields.value = exception.fields || {}; error.value = exception.message; }
+function switchMode(name) { clearFeedback(); router.push({ name: `auth.${name}` }); }
 async function run(callback) {
     if (busy.value) return;
     clearFeedback();
     busy.value = true;
     try { await callback(); }
-    catch (exception) { handleFailure(exception); }
+    catch (exception) { fields.value = exception.fields || {}; error.value = exception.message; }
     finally { busy.value = false; }
 }
-async function submitLogin() {
-    await run(async () => {
-        const result = await authApi.login({ ...loginForm });
-        emit('authenticated', result.data);
-    });
+async function authenticated(apiCall) {
+    const result = await apiCall();
+    setUser(result.data);
+    const redirect = typeof route.query.redirect === 'string' && route.query.redirect.startsWith('/manage') ? route.query.redirect : null;
+    await router.push(redirect || { name: 'account' });
 }
-async function submitRegister() {
-    await run(async () => {
-        const result = await authApi.register({ ...registerForm });
-        emit('authenticated', result.data);
-    });
-}
+async function submitLogin() { await run(() => authenticated(() => authApi.login({ ...loginForm }))); }
+async function submitRegister() { await run(() => authenticated(() => authApi.register({ ...registerForm }))); }
 async function submitRecovery() {
     await run(async () => {
-        const result = mode.value === 'forgot'
-            ? await authApi.forgotPassword({ email: recoveryForm.email })
-            : await authApi.resetPassword({ ...recoveryForm });
+        const result = mode.value === 'forgot' ? await authApi.forgotPassword({ email: recoveryForm.email }) : await authApi.resetPassword({ ...recoveryForm });
         notice.value = result.message;
-        if (mode.value === 'reset') mode.value = 'login';
+        if (mode.value === 'reset') await router.replace({ name: 'auth.login' });
     });
 }
 </script>
 
 <template>
     <section class="auth-layout">
-        <div class="auth-story"><div><span class="eyebrow">WELCOME TO FRAMEWORK</span><h1>一个账号，<br>开启你的专属空间。</h1><p>安全登录，管理个人资料，并为后续会员服务做好准备。</p></div><ul class="feature-list"><li><span>01</span><div><strong>简单安全的账户</strong><p>支持用户名、邮箱和第三方登录。</p></div></li><li><span>02</span><div><strong>你的会员身份</strong><p>VIP 等级与个人资料集中管理。</p></div></li><li><span>03</span><div><strong>可信的邮箱验证</strong><p>清楚掌握账户验证状态。</p></div></li></ul></div>
+        <div class="auth-story"><div><span class="eyebrow">WELCOME TO FRAMEWORK</span><h1>一个账号，<br>开启你的专属空间。</h1><p>安全登录，管理个人资料、资产和消息，在一个工作台完成日常事务。</p></div><ul class="feature-list"><li><span>01</span><div><strong>简单安全的账户</strong><p>支持用户名、邮箱和第三方登录。</p></div></li><li><span>02</span><div><strong>清晰的业务工作区</strong><p>用户中心、钱包和通知分类管理。</p></div></li><li><span>03</span><div><strong>可信的邮箱验证</strong><p>清楚掌握账户验证状态。</p></div></li></ul></div>
         <div class="auth-panel"><div class="auth-card">
             <div v-if="['login', 'register'].includes(mode)" class="auth-tabs" role="tablist"><button type="button" :class="{ 'is-active': mode === 'login' }" @click="switchMode('login')">登录</button><button type="button" :class="{ 'is-active': mode === 'register' }" @click="switchMode('register')">注册</button></div>
-            <div class="auth-heading"><h2>{{ mode === 'login' ? '欢迎回来' : mode === 'register' ? '创建你的账号' : '找回账户密码' }}</h2><p>{{ mode === 'forgot' ? '输入邮箱，我们将发送重置链接。' : mode === 'reset' ? '请设置一个新的账户密码。' : '使用你的账户继续。' }}</p></div>
-            <div v-if="error" class="feedback feedback--error" role="alert">{{ error }}</div><div v-if="notice" class="feedback feedback--success" role="status">{{ notice }}</div>
+            <div class="auth-heading"><h2>{{ heading[0] }}</h2><p>{{ heading[1] }}</p></div>
+            <FeedbackMessage :message="error" /><FeedbackMessage :message="notice" type="success" />
             <form v-if="mode === 'login'" class="auth-form" @submit.prevent="submitLogin">
                 <label class="form-field"><span>用户名或邮箱</span><input v-model.trim="loginForm.login" autocomplete="username" maxlength="256" required><small class="field-error">{{ fieldError('login') }}</small></label>
                 <label class="form-field"><span>密码</span><input v-model="loginForm.password" type="password" autocomplete="current-password" maxlength="128" required><small class="field-error">{{ fieldError('password') }}</small></label>

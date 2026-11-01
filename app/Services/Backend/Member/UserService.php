@@ -4,24 +4,32 @@ namespace App\Services\Backend\Member;
 
 use App\Libs\Notifications\NotificationManager;
 use App\Models\Member\User;
+use App\Models\Member\UserRestriction;
 use App\Services\Backend\BaseService;
 use App\Services\Backend\Common\Audit;
+use App\Services\Member\UserLogService;
+use App\Services\Member\UserRestrictionService;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 
 class UserService extends BaseService
 {
-    public function __construct(private readonly NotificationManager $notifications, private readonly MemberVipService $memberships) {}
+    public function __construct(private readonly NotificationManager $notifications, private readonly MemberVipService $memberships, private readonly UserLogService $userLogs, private readonly UserRestrictionService $restrictionService) {}
 
     public function list(array $validated): LengthAwarePaginator
     {
         $this->authorize('frontend.user.list');
-        $query = User::with(['socialAccounts', 'vipLevel'])->latest('id');
+        $query = User::with(['profile', 'socialAccounts', 'vipLevel', 'activeFreeze', 'wallets'])->latest('id');
         if ($q = $validated['q'] ?? null) {
-            $query->where(fn ($query) => $query->where('name', 'like', '%'.$q.'%')->orWhere('username', 'like', '%'.$q.'%')->orWhere('email', 'like', '%'.$q.'%'));
+            $query->where(fn ($query) => $query->whereHas('profile', fn ($profile) => $profile->where('nickname', 'like', '%'.$q.'%'))->orWhere('username', 'like', '%'.$q.'%')->orWhere('email', 'like', '%'.$q.'%'));
         }
         if (isset($validated['active'])) {
             $query->where('active', $validated['active']);
+        }
+        if (isset($validated['is_test'])) {
+            $query->where('is_test', $validated['is_test']);
         }
         if (isset($validated['verified'])) {
             $validated['verified'] ? $query->whereNotNull('email_verified_at') : $query->whereNull('email_verified_at');
@@ -43,7 +51,7 @@ class UserService extends BaseService
     {
         $this->authorize('frontend.user.detail');
 
-        return User::with(['socialAccounts', 'vipLevel'])->findOrFail($id);
+        return User::with(['profile', 'socialAccounts', 'vipLevel', 'activeFreeze', 'wallets'])->findOrFail($id);
     }
 
     public function update(int $id, array $validated): User
@@ -56,10 +64,17 @@ class UserService extends BaseService
                 $user->email_verified_at = null;
                 $user->auth_version++;
             }
-            $user->fill($validated)->save();
+            $user->fill([
+                'username' => $validated['username'], 'email' => $validated['email'], 'is_test' => $validated['is_test'] ?? $user->is_test,
+                'remark' => array_key_exists('remark', $validated) ? $validated['remark'] : $user->remark,
+                'locale' => $validated['locale'] ?? $user->locale,
+                'default_currency' => $validated['default_currency'] ?? $user->default_currency,
+            ])->save();
+            $user->profile->fill(['nickname' => $validated['name']])->save();
             Audit::record('frontend.user.update', (string) $user->id, ['fields' => array_keys($validated)]);
+            $this->recordAdminAction($user, 'admin.updated', ['fields' => array_keys($validated)]);
 
-            return $user->fresh()->load(['socialAccounts', 'vipLevel']);
+            return $user->fresh()->load(['profile', 'socialAccounts', 'vipLevel', 'activeFreeze', 'wallets']);
         });
     }
 
@@ -69,12 +84,63 @@ class UserService extends BaseService
 
         return DB::transaction(function () use ($id, $validated): User {
             $user = User::lockForUpdate()->findOrFail($id);
-            $user->forceFill(['active' => $validated['active'], 'auth_version' => $user->auth_version + 1])->save();
-            Audit::record('frontend.user.status', (string) $user->id, ['active' => $user->active]);
+            $active = (bool) $validated['active'];
+            $actor = Auth::guard('backend')->user()?->name ?? 'system';
+            $changed = $this->restrictionService->change($user, UserRestriction::TYPE_FREEZE, ! $active, $validated['reason'] ?? null, $actor);
+            if (! $changed) {
+                return $this->present($user);
+            }
+            Audit::record('frontend.user.status', (string) $user->id, ['active' => $user->active, 'reason' => $validated['reason'] ?? null]);
+            $this->recordAdminAction($user, $active ? 'admin.unfrozen' : 'admin.frozen', ['reason' => $validated['reason'] ?? null]);
             $this->notifications->send($user, 'security.account_status', ['status' => $user->active ? 'enabled' : 'disabled']);
 
-            return $user->fresh()->load(['socialAccounts', 'vipLevel']);
+            return $this->present($user);
         });
+    }
+
+    public function restrictions(array $validated): array
+    {
+        $this->authorize('frontend.user.restrictions');
+
+        return DB::transaction(function () use ($validated): array {
+            $users = User::whereIn('id', $validated['user_ids'])->orderBy('id')->lockForUpdate()->get();
+            if ($users->count() !== count($validated['user_ids'])) {
+                throw ValidationException::withMessages(['user_ids' => [__('validation.exists', ['attribute' => 'user ids'])]]);
+            }
+            $type = $validated['type'];
+            $restricted = (bool) $validated['restricted'];
+            $actor = Auth::guard('backend')->user()?->name ?? 'system';
+            $changed = 0;
+            foreach ($users as $user) {
+                if (! $this->restrictionService->change($user, $type, $restricted, $validated['reason'] ?? null, $actor)) {
+                    continue;
+                }
+                $changed++;
+                Audit::record('frontend.user.restrictions', (string) $user->id, ['type' => $type, 'restricted' => $restricted, 'reason' => $validated['reason'] ?? null]);
+                $this->recordAdminAction($user, 'restriction.'.$type.($restricted ? '.applied' : '.lifted'), ['reason' => $validated['reason'] ?? null]);
+                if ($this->restrictionService->revokesSessions($type)) {
+                    $this->notifications->send($user, 'security.account_status', ['status' => $user->active ? 'enabled' : 'disabled']);
+                }
+            }
+
+            return ['count' => $changed, 'type' => $type, 'restricted' => $restricted];
+        });
+    }
+
+    public function restrictionTypes(): array
+    {
+        $this->authorize('frontend.user.restrictions');
+
+        return collect($this->restrictionService->types())->map(fn (array $definition, string $type): array => [
+            'type' => $type, 'capabilities' => $definition['capabilities'],
+        ])->values()->all();
+    }
+
+    public function restriction(int $id, string $type): array
+    {
+        $this->authorize('frontend.user.restriction');
+
+        return ['type' => $type, 'restricted' => $this->restrictionService->has(User::findOrFail($id), $type)];
     }
 
     public function vip(int $id, array $validated): User
@@ -82,8 +148,9 @@ class UserService extends BaseService
         $this->authorize('frontend.user.vip');
         $user = $this->memberships->update($id, $validated);
         Audit::record('frontend.user.vip', (string) $id, ['vip_level_id' => $user->vip_level_id, 'vip_expires_at' => $user->vip_expires_at?->toIso8601String()]);
+        $this->recordAdminAction($user, 'admin.vip_changed', ['vip_level_id' => $user->vip_level_id, 'reason' => $validated['reason'] ?? null]);
 
-        return $user;
+        return $this->present($user);
     }
 
     public function vipOptions(): array
@@ -101,6 +168,13 @@ class UserService extends BaseService
         return $this->memberships->history($id, $validated);
     }
 
+    public function logs(int $id, array $validated): LengthAwarePaginator
+    {
+        $this->authorize('frontend.user.logs');
+
+        return $this->userLogs->history(User::findOrFail($id), $validated);
+    }
+
     public function password(int $id, array $validated): void
     {
         $this->authorize('frontend.user.password');
@@ -111,6 +185,7 @@ class UserService extends BaseService
                 'auth_version' => $user->auth_version + 1,
             ])->save();
             Audit::record('frontend.user.password', (string) $user->id);
+            $this->recordAdminAction($user, 'admin.password_reset');
         });
     }
 
@@ -120,7 +195,18 @@ class UserService extends BaseService
         $user = User::findOrFail($id);
         if (! $user->hasVerifiedEmail()) {
             $user->sendEmailVerificationNotification();
+            $this->recordAdminAction($user, 'admin.verification_sent');
         }
         Audit::record('frontend.user.verification', (string) $user->id);
+    }
+
+    private function present(User $user): User
+    {
+        return $user->fresh()->load(['profile', 'socialAccounts', 'vipLevel', 'activeFreeze', 'wallets']);
+    }
+
+    private function recordAdminAction(User $user, string $action, array $context = []): void
+    {
+        $this->userLogs->record($user, $action, 'admin', Auth::guard('backend')->user()?->name ?? 'system', $context);
     }
 }
