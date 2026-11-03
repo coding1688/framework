@@ -43,5 +43,8 @@
   "all_groups": "すべてのグループ",
   "key_suffix_placeholder": "例：title",
   "key_suffix_required": "グループプレフィックスの後にキーを入力してください。",
-  "key_length_invalid": "完全なキーは 128 文字以内で入力してください。"
+  "key_length_invalid": "完全なキーは 128 文字以内で入力してください。",
+  "depends_on": "依存フィールド",
+  "depends_value": "依存値",
+  "depends_value_placeholder": "空欄の場合は任意の非空値"
 }

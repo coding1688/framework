@@ -9,14 +9,18 @@ import { useSession } from '@/shared/composables/useSession';
 export const router = createRouter({
     history: createWebHistory(),
     scrollBehavior(to) {
-        return to.hash ? { el: to.hash, top: 24 } : { top: 0 };
+        return to.hash ? { el: to.hash, top: 100 } : { top: 0 };
     },
     routes: [
         {
             path: '/',
             component: SiteLayout,
             children: [
-                { path: '', name: 'home', component: () => import('@/modules/home/views/HomeView.vue') },
+                { path: '', name: 'home', redirect: { name: 'docs.development' } },
+                { path: 'docs/development', name: 'docs.development', component: () => import('@/modules/home/views/DevelopmentDocsView.vue'), meta: { title: '开发文档' } },
+                { path: 'docs/development/:slug', name: 'docs.development.article', component: () => import('@/modules/home/views/DevelopmentDocsView.vue'), meta: { title: '开发文档' } },
+                { path: 'docs/usage', name: 'docs.usage', component: () => import('@/modules/home/views/UsageDocsView.vue'), meta: { title: '使用文档' } },
+                { path: 'docs/usage/:slug', name: 'docs.usage.article', component: () => import('@/modules/home/views/UsageDocsView.vue'), meta: { title: '使用文档' } },
                 ...authRoutes,
                 {
                     path: 'manage',

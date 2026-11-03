@@ -2,8 +2,10 @@
 
 namespace App\Libs\Fields\Options;
 
+use App\Libs\Common\VersionedCache;
 use App\Libs\Fields\Contracts\OptionSource;
 use Illuminate\Container\Container;
+use Illuminate\Contracts\Cache\Repository;
 use Illuminate\Support\Traits\Localizable;
 use InvalidArgumentException;
 
@@ -17,9 +19,16 @@ final class OptionSourceRegistry
     /** @var array<string, array{type: string, key: string, category: string, name: array<string, string>|string, provider: OptionSource}> */
     private array $sources = [];
 
+    private ?VersionedCache $versionedCache;
+
     /** @param list<string> $locales */
-    public function __construct(private readonly array $locales = ['en'], private readonly int $maxOptions = 10000)
-    {
+    public function __construct(
+        private readonly array $locales = ['en'],
+        private readonly int $maxOptions = 10000,
+        private readonly ?Repository $cache = null,
+        private readonly int $cacheTtl = 300,
+        private readonly string $cachePrefix = 'field-options',
+    ) {
         if (! in_array('en', $locales, true)) {
             throw new InvalidArgumentException('Option sources require English as their canonical locale.');
         }
@@ -31,6 +40,10 @@ final class OptionSourceRegistry
         if ($maxOptions < 1 || $maxOptions > 10000) {
             throw new InvalidArgumentException('Option source limit must be between 1 and 10000.');
         }
+        if ($cacheTtl < 0 || trim($cachePrefix) === '') {
+            throw new InvalidArgumentException('Invalid option cache configuration.');
+        }
+        $this->versionedCache = $cache === null ? null : new VersionedCache($cache, $cachePrefix, $cacheTtl);
     }
 
     /** @param array<string, string>|string $name Translation dictionary or translation key. */
@@ -109,9 +122,59 @@ final class OptionSourceRegistry
             throw new InvalidArgumentException('Unknown option source.');
         }
         $context ??= $this->defaultContext();
-        $options = $this->withLocale($context->locale, fn (): array => $source['provider']->options($context));
+        $resolve = function () use ($source, $context): array {
+            $options = $this->withLocale($context->locale, fn (): array => $source['provider']->options($context));
 
-        return $this->normalizeOptions($options);
+            return $this->normalizeOptions($options);
+        };
+        if ($this->versionedCache === null) {
+            return $resolve();
+        }
+
+        $label = $type.':'.$key.' · '.$context->locale;
+        if ($context->scope !== null) {
+            $label .= ' · '.$context->scope;
+        }
+        if ($context->actorId !== null) {
+            $label .= ' · actor #'.$context->actorId;
+        }
+
+        return $this->versionedCache->remember($this->cacheKey($type, $key, $context), $resolve, [
+            'label' => $label, 'type' => $type, 'source' => $key,
+            'locale' => $context->locale, 'scope' => $context->scope,
+            'actor_id' => $context->actorId, 'parameters' => $context->parameters,
+        ]);
+    }
+
+    /** @return list<array{key: string, label: string, exists: bool}> */
+    public function entries(?string $search = null): array
+    {
+        return $this->versionedCache?->entries($search) ?? [];
+    }
+
+    public function forget(?string $key = null): void
+    {
+        $this->versionedCache?->forget($key);
+    }
+
+    public function rebuild(string $key): void
+    {
+        $metadata = $this->versionedCache?->metadata($key) ?? throw new InvalidArgumentException('Unknown cache key.');
+        $context = new OptionContext(
+            (string) ($metadata['locale'] ?? 'en'),
+            is_string($metadata['scope'] ?? null) ? $metadata['scope'] : null,
+            isset($metadata['actor_id']) ? (int) $metadata['actor_id'] : null,
+            is_array($metadata['parameters'] ?? null) ? $metadata['parameters'] : [],
+        );
+        $this->forget($key);
+        $this->options((string) ($metadata['type'] ?? ''), (string) ($metadata['source'] ?? ''), $context);
+    }
+
+    private function cacheKey(string $type, string $key, OptionContext $context): string
+    {
+        $contextKey = json_encode([$type, $key, $context->locale, $context->scope, $context->actorId, $context->parameters], JSON_THROW_ON_ERROR);
+
+        return hash('sha256', $contextKey);
     }
 
     /**

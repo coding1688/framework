@@ -24,4 +24,12 @@ class FrontendPageTest extends TestCase
             $this->get($path)->assertOk()->assertSee('id="frontend-app"', false);
         }
     }
+
+    public function test_document_deep_links_return_the_spa_entry(): void
+    {
+        $this->get('/docs/development')->assertOk()->assertSee('id="frontend-app"', false);
+        $this->get('/docs/development/quick-start')->assertOk()->assertSee('id="frontend-app"', false);
+        $this->get('/docs/usage')->assertOk()->assertSee('id="frontend-app"', false);
+        $this->get('/docs/usage/backend-overview')->assertOk()->assertSee('id="frontend-app"', false);
+    }
 }

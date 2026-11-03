@@ -8,5 +8,18 @@
   "source_unavailable": "该选项来源当前不可用。",
   "preview_failed": "无法加载可选值。",
   "loading_options": "正在加载可选值…",
-  "no_options": "暂无可选值。"
+  "no_options": "暂无可选值。",
+  "validation_required": "此字段不能为空。",
+  "validation_required_locale": "请填写 :locale 翻译。",
+  "validation_min_length": "至少输入 :min 个字符。",
+  "validation_max_length": "最多输入 :max 个字符。",
+  "validation_number": "请输入有效数字。",
+  "validation_min_value": "数值不能小于 :min。",
+  "validation_max_value": "数值不能大于 :max。",
+  "validation_precision": "最多保留 :precision 位小数。",
+  "validation_min_selected": "至少选择 :min 项。",
+  "validation_max_selected": "最多选择 :max 项。",
+  "validation_option": "请选择有效选项。",
+  "validation_range": "最小值不能大于最大值。",
+  "validation_locales": "必填语言必须包含在支持的语言中。"
 }

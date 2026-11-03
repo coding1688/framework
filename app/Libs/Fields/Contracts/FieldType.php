@@ -12,6 +12,9 @@ interface FieldType
 
     public function defaultMultiple(): bool;
 
+    /** @param array<string, mixed> $validation */
+    public function required(bool $multiple, array $validation): bool;
+
     public function usesOptions(bool $multiple): bool;
 
     public function dataType(bool $multiple): string;

@@ -22,6 +22,8 @@
   "bullet_list": "无序列表",
   "ordered_list": "有序列表",
   "blockquote": "引用",
+  "code": "行内代码",
+  "code_block": "代码块",
   "link": "插入或编辑链接",
   "unlink": "移除链接",
   "clear_format": "清除格式",

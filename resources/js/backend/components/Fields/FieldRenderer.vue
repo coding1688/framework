@@ -1,6 +1,7 @@
 <script setup>
 import { computed } from 'vue';
 import { resolveFieldComponent } from '@/components/Fields/registry';
+import { fieldStorageKey } from '@/components/Fields/value';
 
 const props = defineProps({
     modelValue: { type: Object, required: true },
@@ -12,17 +13,7 @@ const props = defineProps({
 const emit = defineEmits(['update:modelValue']);
 
 const component = computed(() => resolveFieldComponent(props.fieldType?.component));
-const dataType = computed(() => props.definition.multiple
-    ? props.fieldType?.multiple_data_type
-    : props.fieldType?.data_type);
-const storageKey = computed(() => ({
-    boolean: 'value_boolean',
-    localized_text: 'value_i18n',
-    multi_select: 'value_json',
-    number: 'value_number',
-    select: 'value_string',
-    text: 'value_string',
-})[dataType.value]);
+const storageKey = computed(() => fieldStorageKey(props.fieldType, props.definition.multiple));
 const value = computed({
     get() {
         return storageKey.value ? props.modelValue[storageKey.value] : null;

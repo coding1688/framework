@@ -9,6 +9,7 @@ import { t } from '@/locales';
 import EditorDialog from '@/components/EditorDialog.vue';
 import { SecurityPasswordField, securityPasswordRequirement } from '@/plugins/securityPassword';
 import ValueField from './ValueField.vue';
+import { validateFieldValue } from '@/components/Fields/value';
 
 const props = defineProps({ fieldTypes: { type: Object, default: () => ({}) } });
 const emit = defineEmits(['saved']);
@@ -42,8 +43,12 @@ function toggleClear(next) {
 function updateValue(next) { value.value = next; clear.value = false; }
 async function save() {
     if (busy.value || !visible.value || !changed.value || requiresSecurity.value && !securityConfigured.value || !can('settings', 'update')) return;
-    busy.value = true;
     errors.value = {};
+    if (!clear.value && !definition.value.secret) {
+        const message = validateFieldValue(definition.value, props.fieldTypes[definition.value.input_type], value.value);
+        if (message) { errors.value = { 'values.0.value': [message] }; return; }
+    }
+    busy.value = true;
     controller = new AbortController();
     try {
         const response = await settingApi.update({ data: {

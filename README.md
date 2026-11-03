@@ -37,6 +37,8 @@
 
 ## 快速开始
 
+完整的 Ubuntu 环境要求、软件安装、Nginx 配置和初始化过程见 [开发环境搭建指南](DEVELOPMENT.md)。
+
 ### 1. 准备环境
 
 安装 PHP 8.4、Composer、与 Vite 8 兼容的 Node.js/npm，以及 MySQL 和 Redis。默认配置的会话和缓存使用 Redis。

@@ -25,6 +25,7 @@ const fieldErrors = computed(() => Object.fromEntries(Object.entries(props.error
         <el-form-item v-if="definition.secret" :label="definition.name" :error="errors[`${field}.value.value_string`]?.[0] || errors[`${field}.value`]?.[0]">
             <el-input v-model="secretValue" type="password" show-password autocomplete="new-password" :maxlength="definition.validation?.max_length || 512" :placeholder="secretPlaceholder" :disabled="disabled || clear" />
         </el-form-item>
+        <el-alert v-else-if="definition.options_error" :title="t('fields.source_unavailable')" type="error" :closable="false" show-icon />
         <FieldRenderer v-else :model-value="modelValue" :definition="definition" :field-type="fieldType" :field="field" :errors="fieldErrors" @update:model-value="emit('update:modelValue', $event)" />
         <div class="setting-value-field__support">
             <span class="setting-value-field__description">{{ definition.description }}</span>

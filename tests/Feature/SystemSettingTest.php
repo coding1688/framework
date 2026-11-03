@@ -2,6 +2,8 @@
 
 namespace Tests\Feature;
 
+use App\Libs\Ai\AiManager;
+use App\Libs\Settings\Resolvers\AiSettingResolver;
 use App\Libs\Settings\SettingStore;
 use App\Models\Admin\AdminDepartment;
 use App\Models\Admin\AdminUser;
@@ -9,6 +11,7 @@ use App\Models\System\SystemSettingDefinition;
 use App\Models\System\SystemSettingGroup;
 use App\Models\System\SystemSettingValue;
 use Database\Seeders\backend\admin\AdminMenuSeeder;
+use Database\Seeders\backend\setting\SystemSettingSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
@@ -97,6 +100,68 @@ class SystemSettingTest extends TestCase
 
         $this->assertSame('top-secret', app(SettingStore::class)->get($definition->key));
         $this->assertStringNotContainsString('top-secret', $response->getContent());
+    }
+
+    public function test_ai_provider_groups_and_saved_values_survive_reseeding(): void
+    {
+        $this->backend();
+        $this->seed(SystemSettingSeeder::class);
+        $root = SystemSettingGroup::where('code', 'ai')->sole();
+        $openAi = SystemSettingDefinition::where('key', 'ai.openai.api_key')->sole();
+        SystemSettingValue::factory()->create(['setting_definition_id' => $openAi->id, 'payload' => ['value_string' => 'saved-openai-key']]);
+        $openAi->update(['group_id' => $root->id]);
+
+        $this->seed(SystemSettingSeeder::class);
+
+        $chatGpt = SystemSettingGroup::where('code', 'chatgpt')->sole();
+        $this->assertSame($root->id, $chatGpt->parent_id);
+        $this->assertSame($chatGpt->id, $openAi->fresh()->group_id);
+        $this->assertSame('saved-openai-key', app(SettingStore::class)->get('ai.openai.api_key'));
+        $this->assertSame(1, SystemSettingValue::where('setting_definition_id', $openAi->id)->count());
+        foreach (['claude', 'kimi'] as $code) {
+            $this->assertSame($root->id, SystemSettingGroup::where('code', $code)->sole()->parent_id);
+            $this->assertTrue(SystemSettingDefinition::where('key', 'ai.'.$code.'.api_key')->sole()->secret);
+        }
+        $provider = SystemSettingDefinition::where('key', 'ai.provider')->sole();
+        $this->assertEquals(['openai' => 'ChatGPT', 'claude' => 'Claude', 'kimi' => 'Kimi'], $provider->options_i18n['en']);
+        $resolver = app(AiSettingResolver::class);
+        $this->assertTrue($resolver->hasValue('ai.openai.api_key'));
+        $this->assertFalse($resolver->hasValue('ai.claude.api_key'));
+        $this->assertFalse($resolver->hasValue('ai.kimi.api_key'));
+
+        $optionsResponse = $this->getJson(route('system.setting.options'))->assertOk();
+        $ai = collect($optionsResponse->json('data.groups_tree'))->firstWhere('code', 'ai');
+        $this->assertSame(['chatgpt', 'claude', 'kimi'], array_column($ai['children'], 'code'));
+        $listResponse = $this->getJson(route('system.setting.list', ['group_id' => $chatGpt->id]))->assertOk()
+            ->assertJsonPath('data.definitions.0.key', 'ai.openai.api_key')
+            ->assertJsonPath('data.definitions.0.has_effective_value', true)
+            ->assertJsonPath('data.definitions.0.value', null);
+        $this->assertStringNotContainsString('saved-openai-key', $optionsResponse->getContent());
+        $this->assertStringNotContainsString('saved-openai-key', $listResponse->getContent());
+    }
+
+    public function test_saved_provider_selection_drives_manager_capabilities(): void
+    {
+        $this->seed(SystemSettingSeeder::class);
+        $values = [
+            'ai.enabled' => ['value_boolean' => true],
+            'ai.provider' => ['value_string' => 'kimi'],
+            'ai.kimi.api_key' => ['value_string' => 'saved-kimi-key'],
+        ];
+        foreach ($values as $key => $payload) {
+            SystemSettingValue::factory()->create(['setting_definition_id' => SystemSettingDefinition::where('key', $key)->sole()->id, 'payload' => $payload]);
+        }
+        app(SettingStore::class)->forget();
+
+        $this->assertSame([
+            'provider' => 'kimi',
+            'enabled' => true,
+            'configured' => true,
+            'extraction' => true,
+            'image_analysis' => false,
+            'moderation' => false,
+            'image_generation' => false,
+        ], app(AiManager::class)->capabilities());
     }
 
     private function backend(): void

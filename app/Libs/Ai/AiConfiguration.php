@@ -21,32 +21,35 @@ final class AiConfiguration
         $default = (string) ($fallback['default'] ?? 'openai');
         $provider = $this->settings->get('ai.provider', $default);
         $resolved['default'] = is_string($provider) && in_array($provider, $allowedProviders, true)
-            ? $provider : (in_array($default, $allowedProviders, true) ? $default : 'openai');
-        if (! isset($resolved['providers']['openai']) || ! is_array($resolved['providers']['openai'])) {
-            return $resolved;
+            ? $provider : (in_array($default, $allowedProviders, true) ? $default : ($allowedProviders[0] ?? 'openai'));
+        foreach ($resolved['providers'] ?? [] as $name => $providerConfiguration) {
+            if (! is_array($providerConfiguration)) {
+                continue;
+            }
+            $key = $this->settings->get('ai.'.$name.'.api_key', $providerConfiguration['api_key'] ?? '');
+            if (is_string($key) && strlen(trim($key)) <= 1024 && ! preg_match('/\s/', trim($key))) {
+                $providerConfiguration['api_key'] = trim($key);
+            }
+            foreach (['text_model', 'image_model', 'moderation_model'] as $setting) {
+                if (! array_key_exists($setting, $providerConfiguration)) {
+                    continue;
+                }
+                $fallbackModel = $this->model($providerConfiguration[$setting]);
+                if ($fallbackModel === null) {
+                    continue;
+                }
+                $providerConfiguration[$setting] = $this->model($this->settings->get('ai.'.$name.'.'.$setting, $fallbackModel)) ?? $fallbackModel;
+            }
+            foreach ([
+                'timeout' => ['ai.http_timeout', 90, 1, 180],
+                'image_timeout' => ['ai.image_timeout', 180, 1, 300],
+                'max_output_tokens' => ['ai.max_output_tokens', 16384, 256, 32768],
+            ] as $setting => [$key, $defaultValue, $minimum, $maximum]) {
+                $current = $this->integer($providerConfiguration[$setting] ?? $defaultValue, $minimum, $maximum) ?? $defaultValue;
+                $providerConfiguration[$setting] = $this->integer($this->settings->get($key, $current), $minimum, $maximum) ?? $current;
+            }
+            $resolved['providers'][$name] = $providerConfiguration;
         }
-        $openai = $resolved['providers']['openai'];
-        $key = $this->settings->get('ai.openai.api_key', $openai['api_key'] ?? '');
-        if (is_string($key) && strlen(trim($key)) <= 1024 && ! preg_match('/\s/', trim($key))) {
-            $openai['api_key'] = trim($key);
-        }
-        foreach ([
-            'text_model' => 'gpt-4.1',
-            'image_model' => 'gpt-image-1',
-            'moderation_model' => 'omni-moderation-latest',
-        ] as $setting => $defaultModel) {
-            $fallbackModel = $this->model($openai[$setting] ?? null) ?? $defaultModel;
-            $openai[$setting] = $this->model($this->settings->get('ai.openai.'.$setting, $fallbackModel)) ?? $fallbackModel;
-        }
-        foreach ([
-            'timeout' => ['ai.http_timeout', 90, 1, 180],
-            'image_timeout' => ['ai.image_timeout', 180, 1, 300],
-            'max_output_tokens' => ['ai.max_output_tokens', 16384, 256, 32768],
-        ] as $setting => [$key, $defaultValue, $minimum, $maximum]) {
-            $current = $this->integer($openai[$setting] ?? $defaultValue, $minimum, $maximum) ?? $defaultValue;
-            $openai[$setting] = $this->integer($this->settings->get($key, $current), $minimum, $maximum) ?? $current;
-        }
-        $resolved['providers']['openai'] = $openai;
 
         return $resolved;
     }

@@ -102,6 +102,10 @@ class BackendSecurityPasswordActionTest extends TestCase
         $this->assertSame(['required' => true, 'mode' => 'form'], $routes['development.settingGroup.update']['security_password']);
         $this->assertSame(['required' => true, 'mode' => 'form'], $routes['admin.department.status']['security_password']);
         $this->assertSame(['required' => true, 'mode' => 'dialog'], $routes['frontend.user.password']['security_password']);
+        $this->assertSame(['required' => true, 'mode' => 'form'], $routes['file.storage.create']['security_password']);
+        $this->assertSame(['required' => true, 'mode' => 'form'], $routes['file.storage.update']['security_password']);
+        $this->assertSame(['required' => true, 'mode' => 'dialog'], $routes['file.storage.delete']['security_password']);
+        $this->assertSame(['required' => true, 'mode' => 'dialog'], $routes['file.storage.saveSettings']['security_password']);
         $this->assertArrayNotHasKey('security_password', $routes['development.setting.create']);
         $this->backend();
         $this->postJson(route('test.security.protected'), ['requires_security_password' => false, 'security_password_required' => false])->assertUnprocessable()->assertJsonValidationErrors('security_password');

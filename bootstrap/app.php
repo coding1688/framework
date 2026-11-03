@@ -6,6 +6,7 @@ use App\Http\Middleware\Backend\BackendLocaleMid;
 use App\Http\Middleware\Backend\BackendLogMid;
 use App\Http\Middleware\Backend\BackendSecurityPasswordMid;
 use App\Http\Middleware\Frontend\FrontendAuthMid;
+use App\Http\Middleware\Frontend\FrontendLocaleMid;
 use App\Libs\Ai\Exceptions\AiException;
 use App\Libs\Api\ApiExceptionRenderer;
 use Illuminate\Foundation\Application;
@@ -41,6 +42,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'backend.log' => BackendLogMid::class,
             'backend.securityPassword' => BackendSecurityPasswordMid::class,
             'frontend.auth' => FrontendAuthMid::class,
+            'frontend.locale' => FrontendLocaleMid::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

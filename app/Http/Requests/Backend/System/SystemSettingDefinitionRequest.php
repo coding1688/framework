@@ -24,6 +24,8 @@ class SystemSettingDefinitionRequest extends BaseRequest
             'multiple' => ['required', 'boolean'],
             'option_source_type' => ['sometimes', 'required', Rule::in(['manual', 'constant', 'database'])],
             'option_source_key' => ['nullable', 'string', 'max:64'],
+            'depends_on' => ['nullable', 'string', 'max:128', 'regex:/^[a-z][a-zA-Z0-9]*(?:\.[a-z][a-zA-Z0-9_]*)*$/', Rule::exists('system_setting_definitions', 'key')],
+            'depends_value' => ['nullable', 'string', 'max:128'],
             'validation' => ['nullable', 'array', 'max:16'],
             ...$this->localizedRules('name_i18n', 128),
             ...$this->localizedRules('description_i18n', 512, false),

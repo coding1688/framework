@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Backend\System\SystemCacheController;
 use App\Http\Controllers\Backend\System\SystemNotificationTemplateController;
 use App\Http\Controllers\Backend\System\SystemQueueController;
 use App\Http\Controllers\Backend\System\SystemScheduleController;
@@ -32,6 +33,13 @@ Route::prefix('system')->group(function (): void {
         Route::post('create', 'create')->name('create');
         Route::post('update/{id}', 'update')->whereNumber('id')->name('update');
         Route::post('delete/{id}', 'delete')->whereNumber('id')->name('delete');
+    });
+    Route::prefix('cache')->name('system.cache.')->controller(SystemCacheController::class)->group(function (): void {
+        Route::get('list', 'list')->name('list');
+        Route::get('keys', 'keys')->name('keys');
+        Route::post('clear', 'clear')->middleware('throttle:10,1')->name('clear');
+        Route::post('refresh', 'refresh')->middleware('throttle:10,1')->name('refresh');
+        Route::post('rebuild', 'rebuild')->middleware('throttle:10,1')->name('rebuild');
     });
     Route::prefix('queue')->name('system.queue.')->controller(SystemQueueController::class)->group(function (): void {
         Route::get('overview', 'overview')->name('overview');

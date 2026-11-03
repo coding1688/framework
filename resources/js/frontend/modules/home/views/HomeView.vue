@@ -1,32 +1,119 @@
+<script setup>
+import { computed, onMounted, ref, watch } from 'vue';
+import { useRoute } from 'vue-router';
+import AppIcon from '@/shared/components/AppIcon.vue';
+import LoadingState from '@/shared/components/LoadingState.vue';
+import FeedbackMessage from '@/shared/components/FeedbackMessage.vue';
+import { documentApi } from '../api';
+
+const props = defineProps({ type: { type: String, required: true } });
+const route = useRoute();
+const navigation = ref([]), current = ref(null), navigationLoaded = ref(false);
+const loading = ref(false), error = ref(''), query = ref(''), sidebarOpen = ref(false);
+let requestId = 0;
+
+const pageTitle = computed(() => props.type === 'development' ? '开发文档' : '使用文档');
+const articleRoute = computed(() => props.type === 'development' ? 'docs.development.article' : 'docs.usage.article');
+function hasDocuments(category) {
+    return category.documents?.length || category.children?.some(hasDocuments);
+}
+function flattenCategories(categories, depth = 0) {
+    return categories.flatMap(category => [
+        { ...category, depth },
+        ...flattenCategories(category.children || [], depth + 1),
+    ]);
+}
+const categories = computed(() => flattenCategories(navigation.value.filter(category => category.type === props.type).filter(hasDocuments)).filter(category => category.depth > 0 || category.documents.length));
+const documents = computed(() => categories.value.flatMap(category => (category.documents || []).map(document => ({ ...document, categoryName: category.name }))));
+const searchResults = computed(() => {
+    const keyword = query.value.trim().toLowerCase();
+    if (!keyword) return [];
+    return documents.value.filter(document => [document.title, document.summary, document.slug, document.categoryName].some(value => value?.toLowerCase().includes(keyword))).slice(0, 8);
+});
+const currentIndex = computed(() => documents.value.findIndex(document => document.type === current.value?.type && document.slug === current.value?.slug));
+const previous = computed(() => currentIndex.value > 0 ? documents.value[currentIndex.value - 1] : null);
+const next = computed(() => currentIndex.value >= 0 ? documents.value[currentIndex.value + 1] || null : null);
+const rendered = computed(() => {
+    if (!current.value?.content) return { html: '', headings: [] };
+    const page = new DOMParser().parseFromString(current.value.content, 'text/html');
+    const headings = [...page.querySelectorAll('h2, h3')].map((heading, index) => {
+        const id = `section-${index + 1}`;
+        heading.id = id;
+        return { id, text: heading.textContent, level: Number(heading.tagName.slice(1)) };
+    });
+    return { html: page.body.innerHTML, headings };
+});
+
+async function loadNavigation() {
+    loading.value = true;
+    error.value = '';
+    try {
+        navigation.value = (await documentApi.navigation()).data || [];
+        navigationLoaded.value = true;
+        await loadRouteDocument();
+    } catch (exception) { error.value = exception.message; }
+    finally { loading.value = false; }
+}
+async function loadRouteDocument() {
+    const target = route.params.slug
+        ? { type: props.type, slug: route.params.slug }
+        : documents.value[0];
+    if (!target) { current.value = null; return; }
+    const id = ++requestId;
+    loading.value = true;
+    error.value = '';
+    try {
+        const result = await documentApi.show(target.type, target.slug);
+        if (id !== requestId) return;
+        current.value = result.data;
+        document.title = `${current.value.title} · ${pageTitle.value} · Framework`;
+    } catch (exception) {
+        if (id === requestId) { current.value = null; error.value = exception.message; }
+    } finally { if (id === requestId) loading.value = false; }
+}
+function closeSidebar() { sidebarOpen.value = false; }
+watch(() => route.params.slug, () => {
+    closeSidebar();
+    if (navigationLoaded.value) loadRouteDocument();
+});
+onMounted(loadNavigation);
+</script>
+
 <template>
-    <section class="docs-home">
-        <div class="docs-hero">
-            <span class="docs-kicker">FRAMEWORK DOCUMENTATION</span>
-            <h1>清晰、灵活的<br><em>应用开发框架。</em></h1>
-            <p>从项目搭建、开发规范到 API 与部署，使用统一的 Laravel 和 Vue 技术栈，高效构建可持续扩展的 Web 应用。</p>
-            <div class="docs-hero-actions"><a class="button button--primary" href="#getting-started">快速开始</a><a class="docs-text-link" href="#documentation">浏览核心文档 <span>→</span></a></div>
-            <div class="docs-hero-meta"><span>Laravel</span><span>Vue 3</span><span>API First</span></div>
-        </div>
-        <section id="getting-started" class="docs-section">
-            <div class="docs-section-heading"><span>GETTING STARTED</span><h2>从零开始，快速运行项目</h2><p>按照项目默认命令完成初始化，并分别启动后端和前端开发服务。</p></div>
-            <div class="docs-quickstart">
-                <article class="docs-step"><span class="docs-step-number">01</span><h3>初始化项目</h3><p>安装依赖、生成密钥并初始化数据库。</p><pre><code>composer run setup</code></pre></article>
-                <article class="docs-step"><span class="docs-step-number">02</span><h3>启动后端服务</h3><p>运行 Laravel 开发服务器。</p><pre><code>composer run dev</code></pre></article>
-                <article class="docs-step"><span class="docs-step-number">03</span><h3>启动前端资源</h3><p>启动前后台 Vite 开发服务。</p><pre><code>npm run dev</code></pre></article>
+    <section class="docs-page">
+        <button class="docs-mobile-toggle" type="button" aria-label="打开文档导航" @click="sidebarOpen = true"><AppIcon name="menu" :size="19" />{{ pageTitle }}导航</button>
+        <button v-if="sidebarOpen" class="docs-sidebar-overlay" type="button" aria-label="关闭文档导航" @click="closeSidebar" />
+        <aside class="docs-sidebar" :class="{ 'is-open': sidebarOpen }">
+            <div class="docs-sidebar-mobile"><strong>{{ pageTitle }}</strong><button type="button" aria-label="关闭文档导航" @click="closeSidebar"><AppIcon name="close" :size="20" /></button></div>
+            <div class="docs-search">
+                <AppIcon name="search" :size="17" />
+                <input v-model="query" type="search" :placeholder="`搜索${pageTitle}`" :aria-label="`搜索${pageTitle}`" @keydown.escape="query = ''">
+                <div v-if="query" class="docs-search-results">
+                    <RouterLink v-for="result in searchResults" :key="result.slug" :to="{ name: articleRoute, params: { slug: result.slug } }" @click="query = ''"><strong>{{ result.title }}</strong><small>{{ result.categoryName }}</small></RouterLink>
+                    <span v-if="!searchResults.length">没有匹配的文档</span>
+                </div>
             </div>
-        </section>
-        <section id="documentation" class="docs-section">
-            <div class="docs-section-heading"><span>DOCUMENTATION</span><h2>覆盖完整开发流程</h2><p>围绕实际项目结构组织文档，让每一层职责清晰、易于查找。</p></div>
-            <div class="docs-cards">
-                <article class="docs-card"><span>01</span><h3>应用结构</h3><p>了解目录划分、服务层、请求校验、资源配置及业务模块的组织方式。</p></article>
-                <article class="docs-card"><span>02</span><h3>认证与用户</h3><p>使用注册、登录、账户安全、用户冻结和操作日志等完整账户能力。</p></article>
-                <article class="docs-card"><span>03</span><h3>权限与菜单</h3><p>基于部门、菜单权限和命名路由构建清晰可控的后台访问体系。</p></article>
-                <article class="docs-card"><span>04</span><h3>多端 API</h3><p>通过独立 JSON API 连接 Web 前台，并为后续 uni-app 手机端扩展保留边界。</p></article>
-            </div>
-        </section>
-        <section id="guides" class="docs-guide">
-            <div><span>DEVELOPMENT GUIDE</span><h2>约定优于重复实现</h2><p>遵循项目已有的技术边界，让新功能自然融入框架。</p></div>
-            <ul><li>业务逻辑集中在服务层，控制器只处理 HTTP 输入输出</li><li>前后台 Vue 源码独立，通过 Vite 分别构建</li><li>业务接口保持一致的 JSON 响应与命名路由</li><li>数据库字段、请求校验和前端输入长度保持一致</li></ul>
-        </section>
+            <nav class="docs-navigation" :aria-label="`${pageTitle}目录`">
+                <div class="docs-nav-section"><span class="docs-nav-title">{{ pageTitle }}</span><div v-for="category in categories" :key="category.id" class="docs-nav-group"><span class="docs-nav-category" :class="`depth-${Math.min(category.depth, 3)}`">{{ category.name }}</span><RouterLink v-for="document in category.documents" :key="document.id" :to="{ name: articleRoute, params: { slug: document.slug } }" class="docs-nav-link" :class="[`depth-${Math.min(category.depth, 3)}`, { 'is-active': current?.id === document.id }]">{{ document.title }}</RouterLink></div></div>
+            </nav>
+        </aside>
+
+        <main class="docs-article-wrap">
+            <LoadingState v-if="loading" label="正在加载文档…" />
+            <div v-else-if="error" class="docs-error"><FeedbackMessage :message="error" /><button class="button button--secondary" type="button" @click="loadNavigation">重新加载</button></div>
+            <article v-else-if="current" class="docs-article">
+                <div class="docs-breadcrumb"><span>{{ pageTitle }}</span><span>/</span><span>{{ current.category?.name }}</span></div>
+                <h1>{{ current.title }}</h1>
+                <p v-if="current.summary" class="docs-lead">{{ current.summary }}</p>
+                <div class="docs-content" v-html="rendered.html" />
+                <nav class="docs-pager" aria-label="相邻文档">
+                    <RouterLink v-if="previous" :to="{ name: articleRoute, params: { slug: previous.slug } }" class="docs-pager-prev"><span>上一篇</span><strong>{{ previous.title }}</strong></RouterLink><span v-else />
+                    <RouterLink v-if="next" :to="{ name: articleRoute, params: { slug: next.slug } }" class="docs-pager-next"><span>下一篇</span><strong>{{ next.title }} <AppIcon name="arrow" :size="15" /></strong></RouterLink>
+                </nav>
+            </article>
+            <div v-else class="docs-empty"><h2>暂无{{ pageTitle }}</h2><p>已发布的文档会显示在这里。</p></div>
+        </main>
+
+        <aside v-if="rendered.headings.length && current" class="docs-toc"><span>本页内容</span><nav><a v-for="heading in rendered.headings" :key="heading.id" :href="`#${heading.id}`" :class="{ 'is-sub': heading.level === 3 }">{{ heading.text }}</a></nav></aside>
     </section>
 </template>

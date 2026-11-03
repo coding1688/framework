@@ -8,5 +8,18 @@
   "source_unavailable": "แหล่งตัวเลือกนี้ไม่พร้อมใช้งาน",
   "preview_failed": "ไม่สามารถโหลดตัวเลือกที่มีได้",
   "loading_options": "กำลังโหลดตัวเลือก…",
-  "no_options": "ไม่มีตัวเลือกที่พร้อมใช้งาน"
+  "no_options": "ไม่มีตัวเลือกที่พร้อมใช้งาน",
+  "validation_required": "จำเป็นต้องกรอกฟิลด์นี้",
+  "validation_required_locale": "กรุณากรอกคำแปล :locale",
+  "validation_min_length": "กรอกอย่างน้อย :min ตัวอักษร",
+  "validation_max_length": "กรอกได้ไม่เกิน :max ตัวอักษร",
+  "validation_number": "กรุณากรอกตัวเลขที่ถูกต้อง",
+  "validation_min_value": "ค่าต้องไม่น้อยกว่า :min",
+  "validation_max_value": "ค่าต้องไม่มากกว่า :max",
+  "validation_precision": "ใช้ทศนิยมได้ไม่เกิน :precision ตำแหน่ง",
+  "validation_min_selected": "เลือกอย่างน้อย :min รายการ",
+  "validation_max_selected": "เลือกได้ไม่เกิน :max รายการ",
+  "validation_option": "กรุณาเลือกตัวเลือกที่ถูกต้อง",
+  "validation_range": "ค่าขั้นต่ำต้องไม่มากกว่าค่าสูงสุด",
+  "validation_locales": "ภาษาที่จำเป็นต้องรวมอยู่ในภาษาที่รองรับ"
 }

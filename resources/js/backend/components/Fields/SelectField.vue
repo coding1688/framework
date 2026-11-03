@@ -16,13 +16,13 @@ defineEmits(['update:modelValue']);
             :model-value="definition.multiple ? (modelValue || []) : modelValue"
             :multiple="definition.multiple"
             :multiple-limit="definition.multiple ? (definition.validation?.max_selected || 64) : 0"
-            clearable
+            :clearable="!definition.required"
             filterable
             collapse-tags
             collapse-tags-tooltip
             @update:model-value="$emit('update:modelValue', $event)"
         >
-            <el-option v-for="[value, label] in (definition.option_entries || optionEntries(definition.options))" :key="value" :value="value" :label="label" />
+            <el-option v-for="[value, label] in optionEntries(definition.options)" :key="value" :value="value" :label="label" />
         </el-select>
     </el-form-item>
 </template>

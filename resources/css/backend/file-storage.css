@@ -14,9 +14,14 @@
 
 .file-storage-editor-dialog .el-dialog__body { padding: 14px 18px; }
 .file-storage-editor-dialog .el-form-item, .file-storage-settings .el-form-item { margin-bottom: 12px; }
-.file-storage-editor-dialog .file-storage-grid { column-gap: 12px; }
+.file-storage-editor-dialog .file-storage-grid { column-gap: 20px; }
+.file-storage-editor-dialog .file-storage-grid > .el-form-item { min-width: 0; }
+.file-storage-editor-dialog .file-storage-choice-grid .el-form-item__content,
+.file-storage-editor-dialog .file-storage-checkbox-item .el-form-item__content { display: flex; align-items: center; min-height: 32px; }
+.file-storage-editor-dialog .file-storage-checkbox-item .el-checkbox { height: 32px; }
 .file-storage-editor-dialog .file-storage-muted { margin: 4px 0 0; line-height: 1.4; }
 .file-storage-editor-dialog .el-tabs__header { margin-bottom: 10px; }
 .file-storage-editor-dialog .el-alert { padding: 6px 10px; }
+.file-storage-editor-dialog .security-password-field { margin: 16px 0 4px; }
 
 .file-storage-editor-dialog .translation-field .el-tabs__header { margin-bottom: 0; }

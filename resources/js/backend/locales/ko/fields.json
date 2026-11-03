@@ -8,5 +8,18 @@
   "source_unavailable": "이 옵션 소스는 사용할 수 없습니다.",
   "preview_failed": "사용 가능한 옵션을 불러오지 못했습니다.",
   "loading_options": "옵션 로드 중…",
-  "no_options": "사용 가능한 옵션이 없습니다."
+  "no_options": "사용 가능한 옵션이 없습니다.",
+  "validation_required": "필수 입력 항목입니다.",
+  "validation_required_locale": ":locale 번역을 입력하세요.",
+  "validation_min_length": "최소 :min자를 입력하세요.",
+  "validation_max_length": "최대 :max자까지 입력하세요.",
+  "validation_number": "유효한 숫자를 입력하세요.",
+  "validation_min_value": "값은 :min 이상이어야 합니다.",
+  "validation_max_value": "값은 :max 이하여야 합니다.",
+  "validation_precision": "소수점 이하 :precision자리까지 입력하세요.",
+  "validation_min_selected": "최소 :min개를 선택하세요.",
+  "validation_max_selected": "최대 :max개까지 선택하세요.",
+  "validation_option": "유효한 옵션을 선택하세요.",
+  "validation_range": "최솟값은 최댓값보다 클 수 없습니다.",
+  "validation_locales": "필수 언어는 지원 언어에 포함되어야 합니다."
 }

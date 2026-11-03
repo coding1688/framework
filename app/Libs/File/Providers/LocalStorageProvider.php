@@ -3,7 +3,7 @@
 namespace App\Libs\File\Providers;
 
 use App\Libs\File\Contracts\StorageProvider;
-use App\Models\Common\FileStorageAccount;
+use App\Libs\File\StorageAccount;
 use Illuminate\Filesystem\FilesystemAdapter;
 
 final class LocalStorageProvider implements StorageProvider
@@ -17,7 +17,7 @@ final class LocalStorageProvider implements StorageProvider
         ];
     }
 
-    public function configuration(FileStorageAccount $account): array
+    public function configuration(StorageAccount $account): array
     {
         if (in_array($account->disk, ['public', 'local'], true)) {
             $configuration = (array) config('filesystems.disks.'.$account->disk);
@@ -51,7 +51,7 @@ final class LocalStorageProvider implements StorageProvider
         return false;
     }
 
-    public function customize(FilesystemAdapter $filesystem, FileStorageAccount $account): FilesystemAdapter
+    public function customize(FilesystemAdapter $filesystem, StorageAccount $account): FilesystemAdapter
     {
         return $filesystem;
     }

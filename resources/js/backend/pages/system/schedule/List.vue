@@ -96,8 +96,7 @@ onMounted(async () => { await loadOptions(); await loadTasks(); });
             </div>
             <el-table :data="tasks" v-loading="loading" row-key="id" border :empty-text="t('common.empty')">
                 <el-table-column :label="t('system.schedule.task')" min-width="220"><template #default="{row}"><strong>{{ row.name }}</strong><div><small>{{ row.key }}</small></div></template></el-table-column>
-                <el-table-column :label="t('system.schedule.command')" prop="command" min-width="190" show-overflow-tooltip />
-                <el-table-column label="Cron" prop="cron" width="135" />
+                <el-table-column :label="`${t('system.schedule.command')} / ${t('system.schedule.cron')}`" min-width="240"><template #default="{row}"><div>{{ row.command }}</div><div><small>{{ row.cron }}</small></div></template></el-table-column>
                 <el-table-column :label="t('system.schedule.timezone')" prop="timezone" width="130" />
                 <el-table-column :label="t('system.schedule.next_run')" width="175"><template #default="{row}">{{ row.next_run_at ? date(row.next_run_at) : '—' }}</template></el-table-column>
                 <el-table-column :label="t('system.schedule.last_status')" width="115"><template #default="{row}"><el-tag v-if="row.last_run" :type="statusType(row.last_run.status)">{{ t(`system.schedule.${row.last_run.status}`) }}</el-tag><span v-else>—</span></template></el-table-column>

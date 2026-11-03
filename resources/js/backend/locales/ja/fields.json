@@ -8,5 +8,18 @@
   "source_unavailable": "このオプションソースは利用できません。",
   "preview_failed": "利用可能なオプションを読み込めませんでした。",
   "loading_options": "オプションを読み込み中…",
-  "no_options": "利用可能なオプションがありません。"
+  "no_options": "利用可能なオプションがありません。",
+  "validation_required": "このフィールドは必須です。",
+  "validation_required_locale": ":locale の翻訳を入力してください。",
+  "validation_min_length": ":min 文字以上で入力してください。",
+  "validation_max_length": ":max 文字以内で入力してください。",
+  "validation_number": "有効な数値を入力してください。",
+  "validation_min_value": "値は :min 以上である必要があります。",
+  "validation_max_value": "値は :max 以下である必要があります。",
+  "validation_precision": "小数点以下は :precision 桁以内で入力してください。",
+  "validation_min_selected": ":min 個以上選択してください。",
+  "validation_max_selected": ":max 個以内で選択してください。",
+  "validation_option": "有効なオプションを選択してください。",
+  "validation_range": "最小値は最大値を超えられません。",
+  "validation_locales": "必須言語は対応言語に含める必要があります。"
 }

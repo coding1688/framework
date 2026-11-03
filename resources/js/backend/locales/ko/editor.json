@@ -22,6 +22,8 @@
   "bullet_list": "글머리 기호 목록",
   "ordered_list": "번호 매기기 목록",
   "blockquote": "인용",
+  "code": "인라인 코드",
+  "code_block": "코드 블록",
   "link": "링크 삽입 또는 편집",
   "unlink": "링크 제거",
   "clear_format": "서식 지우기",

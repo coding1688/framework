@@ -39,14 +39,14 @@ class FileStorageAccountController extends BaseController
     }
 
     #[MenuAction(['en' => 'Create', 'zh_CN' => '新增', 'zh_TW' => '新增', 'th' => 'สร้าง', 'ja' => '作成', 'ko' => '생성'])]
-    #[RequireSecurityPassword(mode: 'dialog')]
+    #[RequireSecurityPassword(mode: 'form')]
     public function create(FileStorageAccountRequest $request): JsonResponse
     {
         return apiSuccess(new FileStorageAccountResource($this->service->create($request->validated())), status: 201);
     }
 
     #[MenuAction(['en' => 'Edit', 'zh_CN' => '编辑', 'zh_TW' => '編輯', 'th' => 'แก้ไข', 'ja' => '編集', 'ko' => '편집'])]
-    #[RequireSecurityPassword(mode: 'dialog')]
+    #[RequireSecurityPassword(mode: 'form')]
     public function update(int $id, FileStorageAccountRequest $request): JsonResponse
     {
         return apiSuccess(new FileStorageAccountResource($this->service->update($id, $request->validated())));

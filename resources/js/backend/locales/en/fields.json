@@ -8,5 +8,18 @@
   "source_unavailable": "This option source is unavailable.",
   "preview_failed": "Could not load the available options.",
   "loading_options": "Loading options…",
-  "no_options": "No available options."
+  "no_options": "No available options.",
+  "validation_required": "This field is required.",
+  "validation_required_locale": "Please complete the :locale translation.",
+  "validation_min_length": "Enter at least :min characters.",
+  "validation_max_length": "Enter no more than :max characters.",
+  "validation_number": "Enter a valid number.",
+  "validation_min_value": "The value must be at least :min.",
+  "validation_max_value": "The value must be no more than :max.",
+  "validation_precision": "Use no more than :precision decimal places.",
+  "validation_min_selected": "Select at least :min items.",
+  "validation_max_selected": "Select no more than :max items.",
+  "validation_option": "Select a valid option.",
+  "validation_range": "Minimum values cannot exceed maximum values.",
+  "validation_locales": "Required languages must be included in supported languages."
 }

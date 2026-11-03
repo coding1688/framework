@@ -31,6 +31,11 @@ final class LocalizedTextField implements FieldType
         return false;
     }
 
+    public function required(bool $multiple, array $validation): bool
+    {
+        return ($validation['required_locales'] ?? []) !== [];
+    }
+
     public function usesOptions(bool $multiple): bool
     {
         return false;

@@ -28,6 +28,11 @@ final class CheckboxField implements FieldType
         return true;
     }
 
+    public function required(bool $multiple, array $validation): bool
+    {
+        return ($validation['min_selected'] ?? 0) > 0;
+    }
+
     public function usesOptions(bool $multiple): bool
     {
         return true;

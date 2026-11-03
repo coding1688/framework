@@ -8,5 +8,18 @@
   "source_unavailable": "此選項來源目前無法使用。",
   "preview_failed": "無法載入可選值。",
   "loading_options": "正在載入可選值…",
-  "no_options": "暫無可選值。"
+  "no_options": "暫無可選值。",
+  "validation_required": "此欄位不能為空。",
+  "validation_required_locale": "請填寫 :locale 翻譯。",
+  "validation_min_length": "至少輸入 :min 個字元。",
+  "validation_max_length": "最多輸入 :max 個字元。",
+  "validation_number": "請輸入有效數字。",
+  "validation_min_value": "數值不可小於 :min。",
+  "validation_max_value": "數值不可大於 :max。",
+  "validation_precision": "最多保留 :precision 位小數。",
+  "validation_min_selected": "至少選擇 :min 項。",
+  "validation_max_selected": "最多選擇 :max 項。",
+  "validation_option": "請選擇有效選項。",
+  "validation_range": "最小值不可大於最大值。",
+  "validation_locales": "必填語言必須包含在支援的語言中。"
 }

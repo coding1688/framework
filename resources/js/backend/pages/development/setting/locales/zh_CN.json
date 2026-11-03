@@ -43,5 +43,8 @@
   "all_groups": "全部分类",
   "key_suffix_placeholder": "例如：title",
   "key_suffix_required": "请输入分类前缀后的配置标识。",
-  "key_length_invalid": "完整配置标识不能超过 128 个字符。"
+  "key_length_invalid": "完整配置标识不能超过 128 个字符。",
+  "depends_on": "依赖字段",
+  "depends_value": "依赖值",
+  "depends_value_placeholder": "留空表示任意非空值"
 }

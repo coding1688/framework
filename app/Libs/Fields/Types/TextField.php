@@ -28,6 +28,11 @@ final class TextField implements FieldType
         return false;
     }
 
+    public function required(bool $multiple, array $validation): bool
+    {
+        return ($validation['min_length'] ?? 0) > 0;
+    }
+
     public function usesOptions(bool $multiple): bool
     {
         return false;

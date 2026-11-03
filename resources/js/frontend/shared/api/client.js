@@ -5,6 +5,7 @@ export async function request(path, { method = 'GET', data } = {}) {
         credentials: 'same-origin',
         headers: {
             Accept: 'application/json',
+            'X-Lang': window.frontendConfig.locale,
             ...(data === undefined || formData ? {} : { 'Content-Type': 'application/json' }),
             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
         },

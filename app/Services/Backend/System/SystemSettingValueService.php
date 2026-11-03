@@ -2,6 +2,7 @@
 
 namespace App\Services\Backend\System;
 
+use App\Libs\Fields\FieldDependency;
 use App\Libs\Fields\FieldRegistry;
 use App\Libs\Settings\SettingResolverRegistry;
 use App\Libs\Settings\SettingStore;
@@ -57,6 +58,7 @@ class SystemSettingValueService extends BaseService
                 throw ValidationException::withMessages(['values' => __('backend/common.invalid')]);
             }
             SystemSettingValue::whereIn('setting_definition_id', $ids)->orderBy('setting_definition_id')->lockForUpdate()->get();
+            $entries = collect($validated['values'])->keyBy('definition_id');
             $changed = [];
             foreach ($validated['values'] as $index => $entry) {
                 $definition = $definitions->get($entry['definition_id']);
@@ -65,6 +67,9 @@ class SystemSettingValueService extends BaseService
                     $changed[] = $definition->key;
 
                     continue;
+                }
+                if (! $this->dependencySatisfied($definition, $entries)) {
+                    throw ValidationException::withMessages(['values.'.$index.'.value' => __('backend/common.invalid')]);
                 }
                 $value = $entry['value'] ?? [];
                 if ($definition->secret && array_diff(array_keys($value), ['value_string']) !== []) {
@@ -96,6 +101,32 @@ class SystemSettingValueService extends BaseService
         $this->settings->forget();
 
         return ['translation_locales' => config('platform.locales')];
+    }
+
+    private function dependencySatisfied(SystemSettingDefinition $definition, \Illuminate\Support\Collection $entries): bool
+    {
+        if ($definition->depends_on === null) {
+            return true;
+        }
+        $source = SystemSettingDefinition::where('key', $definition->depends_on)->first();
+        if ($source === null) {
+            return false;
+        }
+        $entry = $entries->get($source->id);
+        if ($entry === null) {
+            return FieldDependency::satisfied($this->settings->get($definition->depends_on), $definition->depends_value);
+        }
+        $payload = ($entry['clear'] ?? false) ? $source->default_value ?? [] : $entry['value'] ?? [];
+        $storageKey = match ($this->fields->get($source->input_type)->dataType($source->multiple)) {
+            'text', 'select' => 'value_string',
+            'localized_text' => 'value_i18n',
+            'number' => 'value_number',
+            'boolean' => 'value_boolean',
+            'multi_select' => 'value_json',
+            default => null,
+        };
+
+        return $storageKey !== null && FieldDependency::satisfied($payload[$storageKey] ?? null, $definition->depends_value);
     }
 
     private function activeGroup(int $id): void

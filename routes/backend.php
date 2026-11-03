@@ -7,6 +7,8 @@ use App\Http\Controllers\Backend\Admin\AdminUserController;
 use App\Http\Controllers\Backend\AuthController;
 use App\Http\Controllers\Backend\Content\ContentAnnouncementController;
 use App\Http\Controllers\Backend\Content\ContentCarouselController;
+use App\Http\Controllers\Backend\Content\ContentDocumentCategoryController;
+use App\Http\Controllers\Backend\Content\ContentDocumentController;
 use App\Http\Controllers\Backend\File\FileController;
 use App\Http\Controllers\Backend\File\FileStorageAccountController;
 use App\Http\Controllers\Backend\Member\MemberVipLevelController;
@@ -137,6 +139,26 @@ Route::middleware(['backend.auth', 'backend.securityPassword'])->group(function 
                 Route::post('delete/{id}', 'delete')->whereNumber('id')->name('delete');
                 Route::get('options', 'options')->name('options');
                 Route::post('upload', 'upload')->name('upload');
+            });
+        });
+
+        Route::prefix('documentation')->name('documentation.')->group(function (): void {
+            Route::prefix('document')->name('document.')->controller(ContentDocumentController::class)->group(function (): void {
+                Route::get('list', 'list')->name('list');
+                Route::get('detail/{id}', 'detail')->whereNumber('id')->name('detail');
+                Route::post('create', 'create')->name('create');
+                Route::post('update/{id}', 'update')->whereNumber('id')->name('update');
+                Route::post('status/{id}', 'status')->whereNumber('id')->name('status');
+                Route::post('delete/{id}', 'delete')->whereNumber('id')->name('delete');
+            });
+            Route::prefix('category')->name('category.')->controller(ContentDocumentCategoryController::class)->group(function (): void {
+                Route::get('list', 'list')->name('list');
+                Route::get('options', 'options')->name('options');
+                Route::get('detail/{id}', 'detail')->whereNumber('id')->name('detail');
+                Route::post('create', 'create')->name('create');
+                Route::post('update/{id}', 'update')->whereNumber('id')->name('update');
+                Route::post('status/{id}', 'status')->whereNumber('id')->name('status');
+                Route::post('delete/{id}', 'delete')->whereNumber('id')->name('delete');
             });
         });
 

@@ -37,6 +37,8 @@ const toolbar = [
     { name: 'bullet_list', icon: 'list-unordered', action: () => editor.value?.chain().focus().toggleBulletList().run(), active: () => editor.value?.isActive('bulletList') },
     { name: 'ordered_list', icon: 'list-ordered', action: () => editor.value?.chain().focus().toggleOrderedList().run(), active: () => editor.value?.isActive('orderedList') },
     { name: 'blockquote', icon: 'double-quotes-l', action: () => editor.value?.chain().focus().toggleBlockquote().run(), active: () => editor.value?.isActive('blockquote') },
+    { name: 'code', icon: 'code-line', action: () => editor.value?.chain().focus().toggleCode().run(), active: () => editor.value?.isActive('code') },
+    { name: 'code_block', icon: 'code-box-line', action: () => editor.value?.chain().focus().toggleCodeBlock().run(), active: () => editor.value?.isActive('codeBlock') },
     { separator: true },
     { name: 'link', icon: 'link', action: () => editLink(), active: () => editor.value?.isActive('link') },
     { name: 'unlink', icon: 'link-unlink', action: () => editor.value?.chain().focus().unsetLink().run(), available: () => editor.value?.isActive('link') },
@@ -123,5 +125,8 @@ watch(disabled, value => editor.value?.setEditable(!value));
 .rich-editor :deep(.tiptap ul), .rich-editor :deep(.tiptap ol) { padding-left: 24px; }
 .rich-editor :deep(.tiptap blockquote) { margin-left: 0; margin-right: 0; padding-left: 12px; border-left: 3px solid var(--el-border-color); color: var(--el-text-color-secondary); }
 .rich-editor :deep(.tiptap a) { color: var(--el-color-primary); text-decoration: underline; }
+.rich-editor :deep(.tiptap code) { padding: 2px 5px; border-radius: 4px; background: var(--el-fill-color); font-family: "SFMono-Regular", Consolas, monospace; font-size: .9em; }
+.rich-editor :deep(.tiptap pre) { padding: 14px 16px; overflow-x: auto; border-radius: 6px; background: #17251f; color: #e1eee8; }
+.rich-editor :deep(.tiptap pre code) { padding: 0; background: transparent; }
 .rich-editor :deep(.tiptap p.is-editor-empty:first-child::before) { content: attr(data-placeholder); float: left; height: 0; color: var(--el-text-color-placeholder); pointer-events: none; }
 </style>

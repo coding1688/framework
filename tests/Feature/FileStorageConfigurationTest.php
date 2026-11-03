@@ -20,6 +20,7 @@ use Database\Seeders\backend\admin\AdminMenuSeeder;
 use Database\Seeders\backend\file\FileStorageSeeder;
 use Database\Seeders\backend\setting\SystemSettingSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Testing\TestResponse;
 use Tests\TestCase;
@@ -183,6 +184,21 @@ class FileStorageConfigurationTest extends TestCase
         }
         $this->assertSame($before, $r2->fresh()->getRawOriginal());
         $this->assertSame(32, FileConfiguration::find(1)->max_upload_mb);
+    }
+
+    public function test_cached_provider_summaries_do_not_contain_storage_credentials(): void
+    {
+        $r2 = FileStorageAccount::where('disk', 'r2')->sole();
+        $this->protectedPostJson(self::BASE.'update/'.$r2->id, $this->payload($r2))->assertOk();
+        app(StorageRegistry::class)->providers();
+        $cache = Cache::store(config('cache.default'));
+        $version = (int) $cache->get('file-storage:version', 0);
+        $value = $cache->get('file-storage:'.$version.':providers');
+        $cached = json_encode($value);
+
+        $this->assertIsArray($value);
+        $this->assertStringNotContainsString('test-secret', $cached);
+        $this->assertStringNotContainsString('test-access', $cached);
     }
 
     private function protectedPostJson(string $uri, array $data = []): TestResponse

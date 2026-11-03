@@ -22,6 +22,8 @@
   "bullet_list": "Bullet list",
   "ordered_list": "Numbered list",
   "blockquote": "Quote",
+  "code": "Inline code",
+  "code_block": "Code block",
   "link": "Insert or edit link",
   "unlink": "Remove link",
   "clear_format": "Clear formatting",

@@ -10,12 +10,20 @@ import { t } from '@/locales';
 import BaseCard from '@/components/ui/BaseCard.vue';
 import { SecurityPasswordDialog, securityPasswordRequirement } from '@/plugins/securityPassword';
 import ValueEditor from './components/ValueEditor.vue';
+import { isFieldDependencySatisfied } from '@/components/Fields/dependency';
+import { fieldPayloadValue } from '@/components/Fields/value';
 
 const options = ref({ groups: [], groups_tree: [], field_types: [] });
 const groupId = ref(null), definitions = ref([]), loading = ref(false), optionsLoading = ref(false), statusBusy = ref(null);
 const editor = ref(), securityDialog = ref();
 const selectedGroup = computed(() => options.value.groups.find(group => group.id === groupId.value));
 const fieldTypes = computed(() => Object.fromEntries(options.value.field_types.map(fieldType => [fieldType.key, fieldType])));
+const visibleDefinitions = computed(() => definitions.value.filter(definition => {
+    if (!definition.depends_on) return true;
+    const source = definitions.value.find(item => item.key === definition.depends_on);
+    if (!source || source.secret || !source.active) return false;
+    return isFieldDependencySatisfied(fieldPayloadValue(source, fieldTypes.value[source.input_type], source.value ?? source.default_value), definition.depends_value);
+}));
 const securityConfigured = computed(() => identity.user?.security_password_set === true);
 const canUpdate = computed(() => can('settings', 'update'));
 const statusRequiresSecurity = computed(() => !!securityPasswordRequirement('system.setting.status', config.routes));
@@ -119,10 +127,10 @@ onBeforeUnmount(() => { disposed = true; listController?.abort(); optionsControl
             <section class="setting-content">
                 <div class="setting-content__heading">
                     <div class="setting-content__title"><small>{{ (selectedGroup?.path || [t('system.setting.groups')]).join(' / ') }}</small><h2>{{ selectedGroup?.name || t('system.setting.title') }}</h2></div>
-                    <div class="setting-content__actions"><span>{{ definitions.length }} {{ t('common.total') }}</span><el-button :icon="Refresh" :loading="loading" :disabled="!!statusBusy || !groupId" @click="load">{{ t('common.refresh') }}</el-button></div>
+                    <div class="setting-content__actions"><span>{{ visibleDefinitions.length }} {{ t('common.total') }}</span><el-button :icon="Refresh" :loading="loading" :disabled="!!statusBusy || !groupId" @click="load">{{ t('common.refresh') }}</el-button></div>
                 </div>
                 <div class="setting-table-wrap">
-                    <el-table :data="definitions" v-loading="loading" row-key="id" class="management-table setting-table">
+                    <el-table :data="visibleDefinitions" v-loading="loading" row-key="id" class="management-table setting-table">
                         <el-table-column :label="t('common.name')" min-width="220"><template #default="{ row }"><div class="setting-name"><strong>{{ row.name }}</strong><small>{{ row.key }}</small></div></template></el-table-column>
                         <el-table-column :label="t('system.setting.current_value')" min-width="260" show-overflow-tooltip><template #default="{ row }"><el-tag v-if="row.secret" type="info" effect="plain">{{ currentValue(row) }}</el-tag><el-tag v-else-if="booleanValue(row)" :type="(row.value ?? row.default_value)?.value_boolean ? 'success' : 'info'" effect="plain">{{ currentValue(row) }}</el-tag><span v-else class="setting-value">{{ currentValue(row) }}</span></template></el-table-column>
                         <el-table-column :label="t('development.setting.input_type')" width="150"><template #default="{ row }"><span class="setting-type">{{ t(`development.setting.type_${row.input_type}`) }}</span></template></el-table-column>

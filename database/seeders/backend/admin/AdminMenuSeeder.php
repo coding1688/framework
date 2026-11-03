@@ -14,13 +14,16 @@ class AdminMenuSeeder extends Seeder
         $member = AdminMenu::firstOrCreate(['permission' => 'member'], ['name_i18n' => ['en' => 'Member Management', 'zh_CN' => '会员管理', 'zh_TW' => '會員管理', 'th' => 'การจัดการสมาชิก', 'ja' => '会員管理', 'ko' => '회원 관리'], 'type' => 'directory', 'icon' => 'group-line', 'is_system' => true]);
         $content = AdminMenu::firstOrCreate(['permission' => 'content'], ['name_i18n' => ['en' => 'Content', 'zh_CN' => '内容管理', 'zh_TW' => '內容管理', 'th' => 'จัดการเนื้อหา', 'ja' => 'コンテンツ管理', 'ko' => '콘텐츠 관리'], 'type' => 'directory', 'icon' => 'article-line', 'is_system' => true]);
         $development = AdminMenu::firstOrCreate(['permission' => 'development'], ['name_i18n' => ['en' => 'Development Management', 'zh_CN' => '开发管理', 'zh_TW' => '開發管理', 'th' => 'การจัดการการพัฒนา', 'ja' => '開発管理', 'ko' => '개발 관리'], 'type' => 'directory', 'icon' => 'terminal-box-line', 'is_system' => true]);
+        $documentation = AdminMenu::firstOrCreate(['permission' => 'documentation'], ['name_i18n' => ['en' => 'Documentation', 'zh_CN' => '文档管理', 'zh_TW' => '文件管理', 'th' => 'จัดการเอกสาร', 'ja' => 'ドキュメント管理', 'ko' => '문서 관리'], 'type' => 'directory', 'parent_id' => null, 'icon' => 'book-2-line', 'sort' => 1001, 'is_system' => true]);
+        $documentation->forceFill(['parent_id' => null, 'sort' => 1001])->save();
         $system = AdminMenu::firstOrCreate(['permission' => 'system'], ['name_i18n' => ['en' => 'System', 'zh_CN' => '系统配置', 'zh_TW' => '系統設定', 'th' => 'ระบบ', 'ja' => 'システム', 'ko' => '시스템'], 'type' => 'directory', 'icon' => 'settings-2-line', 'is_system' => true]);
         $this->fillTranslations($root, ['en' => 'Administration', 'zh_CN' => '系统管理', 'zh_TW' => '系統管理', 'th' => 'การดูแลระบบ', 'ja' => '管理', 'ko' => '관리']);
         $this->fillTranslations($member, ['en' => 'Member Management', 'zh_CN' => '会员管理', 'zh_TW' => '會員管理', 'th' => 'การจัดการสมาชิก', 'ja' => '会員管理', 'ko' => '회원 관리']);
         $this->fillTranslations($content, ['en' => 'Content', 'zh_CN' => '内容管理', 'zh_TW' => '內容管理', 'th' => 'จัดการเนื้อหา', 'ja' => 'コンテンツ管理', 'ko' => '콘텐츠 관리']);
+        $this->fillTranslations($documentation, ['en' => 'Documentation', 'zh_CN' => '文档管理', 'zh_TW' => '文件管理', 'th' => 'จัดการเอกสาร', 'ja' => 'ドキュメント管理', 'ko' => '문서 관리']);
         $this->fillTranslations($development, ['en' => 'Development Management', 'zh_CN' => '开发管理', 'zh_TW' => '開發管理', 'th' => 'การจัดการการพัฒนา', 'ja' => '開発管理', 'ko' => '개발 관리']);
         $this->fillTranslations($system, ['en' => 'System', 'zh_CN' => '系统配置', 'zh_TW' => '系統設定', 'th' => 'ระบบ', 'ja' => 'システム', 'ko' => '시스템']);
-        foreach ([[$root, 'team-line'], [$member, 'group-line'], [$content, 'article-line'], [$development, 'terminal-box-line'], [$system, 'settings-2-line']] as [$menu, $icon]) {
+        foreach ([[$root, 'team-line'], [$member, 'group-line'], [$content, 'article-line'], [$documentation, 'book-2-line'], [$development, 'terminal-box-line'], [$system, 'settings-2-line']] as [$menu, $icon]) {
             if (in_array($menu->icon, [null, '', 'folder-line'], true)) {
                 $menu->forceFill(['icon' => $icon])->save();
             }
@@ -33,7 +36,7 @@ class AdminMenuSeeder extends Seeder
                 $developmentTranslations[$locale] = $developmentNames[$locale];
             }
         }
-        $development->forceFill(['name_i18n' => $developmentTranslations, 'sort' => 1000])->save();
+        $development->forceFill(['name_i18n' => $developmentTranslations, 'sort' => (int) AdminMenu::whereNull('parent_id')->where('permission', '!=', 'development')->max('sort') + 1])->save();
         foreach (['system.queue', 'system.schedule'] as $permission) {
             $menu = AdminMenu::where('permission', $permission)->first();
             if ($menu && $menu->parent_id === $system->id) {

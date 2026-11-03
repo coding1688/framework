@@ -26,7 +26,7 @@ return [
                 'slate' => ['color' => '#64748b'],
             ],
         ],
-        'permission_prefixes' => ['queues' => 'system.queue', 'schedules' => 'system.schedule', 'notificationTemplates' => 'system.notificationTemplate', 'frontendUsers' => 'frontend.user', 'vipLevels' => 'member.vipLevel', 'memberWallet' => 'member.wallet', 'administrators' => 'admin.user', 'departments' => 'admin.department', 'menus' => 'admin.menu', 'logs' => 'admin.log', 'announcements' => 'content.announcement', 'carousels' => 'content.carousel', 'files' => 'file.item', 'fileStorages' => 'file.storage', 'settings' => 'system.setting', 'settingDefinitions' => 'development.setting', 'settingGroups' => 'development.settingGroup'],
+        'permission_prefixes' => ['caches' => 'system.cache', 'queues' => 'system.queue', 'schedules' => 'system.schedule', 'notificationTemplates' => 'system.notificationTemplate', 'frontendUsers' => 'frontend.user', 'vipLevels' => 'member.vipLevel', 'memberWallet' => 'member.wallet', 'administrators' => 'admin.user', 'departments' => 'admin.department', 'menus' => 'admin.menu', 'logs' => 'admin.log', 'announcements' => 'content.announcement', 'carousels' => 'content.carousel', 'documents' => 'documentation.document', 'documentCategories' => 'documentation.category', 'files' => 'file.item', 'fileStorages' => 'file.storage', 'settings' => 'system.setting', 'settingDefinitions' => 'development.setting', 'settingGroups' => 'development.settingGroup'],
     ],
     'locales' => [
         'zh_CN' => '简体中文', 'zh_TW' => '繁體中文', 'en' => 'English',

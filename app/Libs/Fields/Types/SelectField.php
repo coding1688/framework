@@ -28,6 +28,11 @@ final class SelectField implements FieldType
         return false;
     }
 
+    public function required(bool $multiple, array $validation): bool
+    {
+        return ! $multiple || ($validation['min_selected'] ?? 0) > 0;
+    }
+
     public function usesOptions(bool $multiple): bool
     {
         return true;

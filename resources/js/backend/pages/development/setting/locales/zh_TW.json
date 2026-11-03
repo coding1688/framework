@@ -43,5 +43,8 @@
   "all_groups": "全部分類",
   "key_suffix_placeholder": "例如：title",
   "key_suffix_required": "請輸入分類前綴後的設定識別碼。",
-  "key_length_invalid": "完整設定識別碼不可超過 128 個字元。"
+  "key_length_invalid": "完整設定識別碼不可超過 128 個字元。",
+  "depends_on": "依賴欄位",
+  "depends_value": "依賴值",
+  "depends_value_placeholder": "留空表示任意非空值"
 }

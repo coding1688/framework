@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\DocumentController;
 use App\Http\Controllers\Api\EmailVerificationController;
 use App\Http\Controllers\Api\MemberWalletController;
 use App\Http\Controllers\Api\NotificationController;
@@ -45,6 +46,11 @@ Route::domain(config('platform.frontend_domain'))->prefix('api/v1/wallets')->nam
     Route::get('list', 'list')->name('list');
     Route::get('history', 'history')->name('history');
     Route::get('statistics', 'statistics')->name('statistics');
+});
+
+Route::domain(config('platform.frontend_domain'))->prefix('api/v1/documents')->name('documents.')->middleware('frontend.locale')->controller(DocumentController::class)->group(function (): void {
+    Route::get('navigation', 'navigation')->name('navigation');
+    Route::get('{type}/{slug}', 'show')->where(['type' => 'development|usage', 'slug' => '[a-z0-9-]+'])->name('show');
 });
 
 Route::domain(config('platform.frontend_domain'))->get('/', PageController::class)->name('frontend.home');

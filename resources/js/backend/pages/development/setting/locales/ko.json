@@ -43,5 +43,8 @@
   "all_groups": "모든 그룹",
   "key_suffix_placeholder": "예: title",
   "key_suffix_required": "그룹 접두사 뒤에 키를 입력하세요.",
-  "key_length_invalid": "전체 키는 128자 이하여야 합니다."
+  "key_length_invalid": "전체 키는 128자 이하여야 합니다.",
+  "depends_on": "종속 필드",
+  "depends_value": "종속 값",
+  "depends_value_placeholder": "비워 두면 모든 비어 있지 않은 값 허용"
 }

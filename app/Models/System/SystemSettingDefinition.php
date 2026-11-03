@@ -16,7 +16,7 @@ class SystemSettingDefinition extends Model
 {
     use HasFactory, HasLocalizedAttributes;
 
-    protected $fillable = ['group_id', 'key', 'name_i18n', 'description_i18n', 'input_type', 'multiple', 'option_source_type', 'option_source_key', 'validation', 'options_i18n', 'default_value', 'secret', 'active', 'sort'];
+    protected $fillable = ['group_id', 'key', 'name_i18n', 'description_i18n', 'input_type', 'multiple', 'option_source_type', 'option_source_key', 'depends_on', 'depends_value', 'validation', 'options_i18n', 'default_value', 'secret', 'active', 'sort'];
 
     protected $hidden = ['default_value'];
 
@@ -41,11 +41,16 @@ class SystemSettingDefinition extends Model
     {
         return Attribute::make(get: function (): array {
             try {
-                return app(FieldRegistry::class)->optionSources()->resolve(
+                $options = app(FieldRegistry::class)->optionSources()->resolve(
                     $this->option_source_type ?? 'manual', $this->option_source_key,
                     $this->options_i18n ?? [], app(OptionContext::class),
                 );
+                $this->setAttribute('options_error', false);
+
+                return $options;
             } catch (InvalidArgumentException) {
+                $this->setAttribute('options_error', true);
+
                 return [];
             }
         });

@@ -28,6 +28,8 @@ return new class extends Migration
             $table->boolean('multiple')->default(false);
             $table->string('option_source_type', 32)->default('manual');
             $table->string('option_source_key', 64)->nullable();
+            $table->string('depends_on', 128)->nullable();
+            $table->string('depends_value', 128)->nullable();
             $table->json('validation')->nullable();
             $table->json('options_i18n')->nullable();
             $table->json('default_value')->nullable();

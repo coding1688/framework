@@ -23,7 +23,7 @@ class AiStatus extends Command
         $rows[] = ['draft_ttl_seconds', config('ai.tasks.ttl')];
         $this->table(['Setting', 'Value'], $rows);
         if (! $capabilities['enabled'] || ! $capabilities['configured']) {
-            $this->warn('Configure the provider key and enable AI in System settings > AI, or set AI_ENABLED and OPENAI_API_KEY in the server environment.');
+            $this->warn('Configure the selected provider key and enable AI in System settings > AI, or use the corresponding server environment variables.');
         }
 
         return self::SUCCESS;

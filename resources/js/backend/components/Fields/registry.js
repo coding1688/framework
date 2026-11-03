@@ -1,6 +1,6 @@
-import { defineAsyncComponent } from 'vue';
+import { defineAsyncComponent, shallowRef } from 'vue';
 
-export const fieldComponents = Object.freeze({
+export const fieldComponents = shallowRef({
     checkbox: defineAsyncComponent(() => import('@/components/Fields/CheckboxField.vue')),
     input: defineAsyncComponent(() => import('@/components/Fields/TextField.vue')),
     'input-number': defineAsyncComponent(() => import('@/components/Fields/NumberField.vue')),
@@ -10,6 +10,11 @@ export const fieldComponents = Object.freeze({
     switch: defineAsyncComponent(() => import('@/components/Fields/SwitchField.vue')),
 });
 
+export function registerFieldComponent(component, loader) {
+    if (!component || typeof loader !== 'function') throw new TypeError('A field component key and async loader are required.');
+    fieldComponents.value = { ...fieldComponents.value, [component]: defineAsyncComponent(loader) };
+}
+
 export function resolveFieldComponent(component) {
-    return fieldComponents[component] || null;
+    return fieldComponents.value[component] || null;
 }

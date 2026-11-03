@@ -43,5 +43,8 @@
   "all_groups": "All groups",
   "key_suffix_placeholder": "For example: title",
   "key_suffix_required": "Enter a key after the group prefix.",
-  "key_length_invalid": "The complete key must be at most 128 characters."
+  "key_length_invalid": "The complete key must be at most 128 characters.",
+  "depends_on": "Depends on",
+  "depends_value": "Expected dependency value",
+  "depends_value_placeholder": "Any nonempty value when empty"
 }

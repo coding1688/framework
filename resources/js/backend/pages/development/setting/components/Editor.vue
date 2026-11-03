@@ -13,6 +13,7 @@ import FormStatusField from '@/components/FormStatusField.vue';
 import FieldRenderer from '@/components/Fields/FieldRenderer.vue';
 import ValidationSettings from '@/components/Fields/ValidationSettings.vue';
 import OptionSourceSelector from '@/components/Fields/OptionSourceSelector.vue';
+import { validateFieldValue, validateValidationSettings } from '@/components/Fields/value';
 
 const props = defineProps({ options: { type: Object, default: () => ({ groups: [], input_types: [] }) }, groupId: { type: [Number, String], default: null } });
 const emit = defineEmits(['saved']);
@@ -66,6 +67,7 @@ const supportsOptions = computed(() => selectedType.value?.options_mode === 'alw
 const validationSchema = computed(() => form.multiple ? selectedType.value?.multiple_validation_schema : selectedType.value?.validation_schema);
 const previewOptions = computed(() => form.option_source_type !== 'manual' ? externalOptions.value : Object.fromEntries(optionRows.value.filter(option => option.value).map(option => [option.value, option.label_i18n.en || option.value])));
 const defaultDefinition = computed(() => ({ name: t('development.setting.default_value'), input_type: form.input_type, multiple: form.multiple, validation: form.validation, options: previewOptions.value, required: false }));
+const dependencyDefinitions = computed(() => (props.options.dependency_definitions || []).filter(definition => definition.group_id === form.group_id && definition.key !== form.key));
 const defaultErrors = computed(() => Object.fromEntries(Object.entries(errors.value).map(([key, value]) => [key.startsWith('default_value.value_i18n.') ? key.replace('default_value.value_i18n.', 'default_value.') : key.startsWith('default_value.') ? 'default_value' : key, value])));
 let optionSequence = 0;
 
@@ -85,10 +87,11 @@ function changeMultiple() {
     form.validation = validationDefaults(form.input_type, form.multiple);
     form.default_value = blankValue();
 }
+function changeGroup() { form.depends_on = null; form.depends_value = null; }
 function changeSecret(value) {
     if (value) form.default_value = blankValue();
 }
-function changeOptionSource() { form.default_value = blankValue(); externalOptions.value = {}; }
+function changeOptionSource() { form.default_value = blankValue(); form.options_error = false; externalOptions.value = {}; }
 function loadSourceOptions({ type, key, signal }) { return settingDefinitionApi.optionValues({ query: { option_source_type: type, option_source_key: key }, signal }); }
 function addOption() { optionRows.value.push({ id: ++optionSequence, value: '', label_i18n: blank() }); }
 async function open(row = null) {
@@ -101,6 +104,7 @@ async function open(row = null) {
         key: record?.key || '', name_i18n: { ...blank(), ...record?.name_i18n },
         description_i18n: { ...blank(), ...record?.description_i18n },
         input_type: inputType, multiple, option_source_type: record?.option_source_type || 'manual', option_source_key: record?.option_source_key || null, validation: validationDefaults(inputType, multiple, record?.validation || {}),
+        depends_on: record?.depends_on || null, depends_value: record?.depends_value || null, options_error: record?.options_error ?? false,
         default_value: { ...blankValue(), ...record?.default_value }, secret: record?.secret ?? false,
         active: record?.active ?? true, sort: record?.sort ?? 0,
     });
@@ -129,6 +133,8 @@ function save() {
         form.key = keyPrefix.value + suffix;
     }
     if (String(form.key || '').length > 128) { errors.value = { ...errors.value, key: [t('development.setting.key_length_invalid')] }; return; }
+    const validationError = validateValidationSettings(validationSchema.value || [], form.validation || {});
+    if (validationError) { errors.value = { ...errors.value, validation: [validationError] }; return; }
     if (supportsOptions.value && form.option_source_type === 'manual') {
         const keys = optionRows.value.map(option => option.value.trim());
         if (!keys.length || keys.some(value => !value) || new Set(keys).size !== keys.length || optionRows.value.some(option => !option.label_i18n.en?.trim())) {
@@ -136,10 +142,14 @@ function save() {
             return;
         }
     }
+    if (!form.secret && hasDefaultValue(form.default_value)) {
+        const defaultError = validateFieldValue(defaultDefinition.value, selectedType.value, form.default_value);
+        if (defaultError) { errors.value = { ...errors.value, default_value: [defaultError] }; return; }
+    }
     const options_i18n = Object.fromEntries(Object.keys(config.locales).map(locale => [locale, Object.fromEntries(
         supportsOptions.value && form.option_source_type === 'manual' ? optionRows.value.filter(option => option.label_i18n[locale]?.trim()).map(option => [option.value.trim(), option.label_i18n[locale].trim()]) : [],
     )]));
-    return submit(editing.value ? 'update' : 'create', { ...form, option_source_type: supportsOptions.value ? form.option_source_type : 'manual', option_source_key: supportsOptions.value && form.option_source_type !== 'manual' ? form.option_source_key : null, options_i18n, default_value: form.secret || !hasDefaultValue(form.default_value) ? null : form.default_value, ...(requiresSecurity.value ? { security_password: securityPassword.value } : {}) });
+    return submit(editing.value ? 'update' : 'create', { ...form, depends_on: form.depends_on || null, depends_value: form.depends_on ? form.depends_value || null : null, option_source_type: supportsOptions.value ? form.option_source_type : 'manual', option_source_key: supportsOptions.value && form.option_source_type !== 'manual' ? form.option_source_key : null, options_i18n, default_value: form.secret || !hasDefaultValue(form.default_value) ? null : form.default_value, ...(requiresSecurity.value ? { security_password: securityPassword.value } : {}) });
 }
 watch([visible, requiresSecurity], ([isVisible, required]) => { if (!isVisible || !required) securityPassword.value = ''; }, { flush: 'sync' });
 onBeforeUnmount(() => { securityPassword.value = ''; });
@@ -150,7 +160,7 @@ defineExpose({ open });
     <EditorDialog v-model="visible" :title="t(editing ? 'common.edit' : 'common.create')" width="82vw" :busy="busy" :read-only="previewLoading || requiresSecurity && !securityConfigured" @save="save">
         <el-form label-position="right" label-width="auto" class="horizontal-editor-form">
             <div class="field-grid">
-                <el-form-item :label="t('development.setting.group')" required :error="errors.group_id?.[0]"><el-tree-select v-model="form.group_id" :data="groupsTree" node-key="id" :props="{ label: 'name', children: 'children' }" check-strictly default-expand-all :render-after-expand="false" /></el-form-item>
+                <el-form-item :label="t('development.setting.group')" required :error="errors.group_id?.[0]"><el-tree-select v-model="form.group_id" :data="groupsTree" node-key="id" :props="{ label: 'name', children: 'children' }" check-strictly default-expand-all :render-after-expand="false" @change="changeGroup" /></el-form-item>
                 <el-form-item :label="t('development.setting.key')" required :error="errors.key?.[0]">
                     <el-input v-if="editing" v-model="form.key" maxlength="128" :placeholder="t('development.setting.key_placeholder')" />
                     <el-input v-else v-model="keySuffix" :maxlength="keySuffixMaxLength" :disabled="keySuffixMaxLength === 0" :placeholder="t('development.setting.key_suffix_placeholder')" @paste="pasteKey"><template v-if="keyPrefix" #prepend><span class="setting-key-prefix" :title="keyPrefix">{{ keyPrefix }}</span></template></el-input>
@@ -162,6 +172,11 @@ defineExpose({ open });
                 <el-form-item :label="t('development.setting.input_type')" required :error="errors.input_type?.[0]"><el-select v-model="form.input_type" @change="changeInputType"><el-option v-for="type in options.input_types || []" :key="type.key" :label="t(`development.setting.type_${type.key}`)" :value="type.key" /></el-select></el-form-item>
                 <el-form-item v-if="supportsMultiple" :label="t('development.setting.multiple')"><el-switch v-model="form.multiple" @change="changeMultiple" /></el-form-item>
             </div>
+            <div class="field-grid">
+                <el-form-item :label="t('development.setting.depends_on')" :error="errors.depends_on?.[0]"><el-select v-model="form.depends_on" clearable filterable @change="form.depends_value = null"><el-option v-for="definition in dependencyDefinitions" :key="definition.id" :label="`${definition.name} (${definition.key})`" :value="definition.key" /></el-select></el-form-item>
+                <el-form-item :label="t('development.setting.depends_value')" :error="errors.depends_value?.[0]"><el-input v-model="form.depends_value" :disabled="!form.depends_on" maxlength="128" :placeholder="t('development.setting.depends_value_placeholder')" /></el-form-item>
+            </div>
+            <el-alert v-if="form.options_error" :title="t('fields.source_unavailable')" type="error" :closable="false" show-icon />
             <OptionSourceSelector v-if="supportsOptions" v-model:source-type="form.option_source_type" v-model:source-key="form.option_source_key" :source-types="options.option_source_types || []" :sources="options.option_sources || []" :categories="options.option_source_categories || []" :load-options="loadSourceOptions" :active="visible" :disabled="busy" :errors="errors" @change="changeOptionSource" @preview="externalOptions = $event" @loading="previewLoading = $event">
             <section class="setting-definition-section">
                 <div class="setting-definition-heading"><h3>{{ t('development.setting.options') }}</h3><el-button :icon="Plus" @click="addOption">{{ t('development.setting.add_option') }}</el-button></div>

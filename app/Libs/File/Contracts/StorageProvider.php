@@ -2,7 +2,7 @@
 
 namespace App\Libs\File\Contracts;
 
-use App\Models\Common\FileStorageAccount;
+use App\Libs\File\StorageAccount;
 use Illuminate\Filesystem\FilesystemAdapter;
 
 interface StorageProvider
@@ -11,7 +11,7 @@ interface StorageProvider
     public function rules(): array;
 
     /** @return array<string, mixed> */
-    public function configuration(FileStorageAccount $account): array;
+    public function configuration(StorageAccount $account): array;
 
     /** @param array<string, mixed> $configuration */
     public function configured(array $configuration): bool;
@@ -20,5 +20,5 @@ interface StorageProvider
 
     public function endpointRequired(): bool;
 
-    public function customize(FilesystemAdapter $filesystem, FileStorageAccount $account): FilesystemAdapter;
+    public function customize(FilesystemAdapter $filesystem, StorageAccount $account): FilesystemAdapter;
 }

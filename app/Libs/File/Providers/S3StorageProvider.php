@@ -3,7 +3,7 @@
 namespace App\Libs\File\Providers;
 
 use App\Libs\File\Contracts\StorageProvider;
-use App\Models\Common\FileStorageAccount;
+use App\Libs\File\StorageAccount;
 use Illuminate\Filesystem\FilesystemAdapter;
 
 class S3StorageProvider implements StorageProvider
@@ -22,7 +22,7 @@ class S3StorageProvider implements StorageProvider
         ];
     }
 
-    public function configuration(FileStorageAccount $account): array
+    public function configuration(StorageAccount $account): array
     {
         $configuration = $account->configuration;
 
@@ -53,7 +53,7 @@ class S3StorageProvider implements StorageProvider
         return $this->requiresEndpoint;
     }
 
-    public function customize(FilesystemAdapter $filesystem, FileStorageAccount $account): FilesystemAdapter
+    public function customize(FilesystemAdapter $filesystem, StorageAccount $account): FilesystemAdapter
     {
         return $filesystem;
     }

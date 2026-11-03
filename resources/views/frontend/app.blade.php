@@ -7,7 +7,7 @@
     <meta name="theme-color" content="#176b52">
     <meta name="description" content="Framework 框架开发文档，了解项目结构、快速开始、认证权限、前后台开发和多端 API。">
     <title>开发文档 · {{ config('app.name') }}</title>
-    <script>window.frontendConfig = {{ Illuminate\Support\Js::from(['oauth' => ['google' => route('oauth.redirect', ['provider' => 'google']), 'facebook' => route('oauth.redirect', ['provider' => 'facebook'])], 'oauthBind' => ['google' => route('oauth.bind', ['provider' => 'google']), 'facebook' => route('oauth.bind', ['provider' => 'facebook'])]]) }};</script>
+    <script>window.frontendConfig = {{ Illuminate\Support\Js::from(['locale' => app()->getLocale(), 'oauth' => ['google' => route('oauth.redirect', ['provider' => 'google']), 'facebook' => route('oauth.redirect', ['provider' => 'facebook'])], 'oauthBind' => ['google' => route('oauth.bind', ['provider' => 'google']), 'facebook' => route('oauth.bind', ['provider' => 'facebook'])]]) }};</script>
     {{ Illuminate\Support\Facades\Vite::useHotFile(public_path('frontend.hot'))->withEntryPoints(['resources/js/frontend/app.js'])->useBuildDirectory('build/frontend') }}
 </head>
 <body>

@@ -10,7 +10,7 @@ const { user } = useSession();
         <header class="site-header-bar">
             <div class="site-header">
                 <RouterLink class="brand" :to="{ name: 'home' }"><span class="brand-mark">F</span><span>Framework</span></RouterLink>
-                <nav class="header-navigation" aria-label="文档导航"><RouterLink :to="{ name: 'home', hash: '#getting-started' }">快速开始</RouterLink><RouterLink :to="{ name: 'home', hash: '#documentation' }">核心文档</RouterLink><RouterLink :to="{ name: 'home', hash: '#guides' }">开发约定</RouterLink></nav>
+                <nav class="header-navigation" aria-label="文档导航"><RouterLink :to="{ name: 'docs.development.article', params: { slug: 'quick-start' } }">快速开始</RouterLink><RouterLink :to="{ name: 'docs.development' }">开发文档</RouterLink><RouterLink :to="{ name: 'docs.usage' }">使用文档</RouterLink></nav>
                 <RouterLink class="account-trigger" :to="{ name: user ? 'account' : 'auth.login' }"><AppIcon name="user" :size="18" /><span>{{ user ? user.name : '登录 / 注册' }}</span></RouterLink>
             </div>
         </header>

@@ -1,5 +1,5 @@
 <script setup>
-import { computed, onActivated, onBeforeUnmount, onDeactivated, onMounted, ref } from 'vue';
+import { computed, onActivated, onBeforeUnmount, onDeactivated, onMounted, ref, watch } from 'vue';
 import { Delete, Edit, Plus, Refresh } from '@element-plus/icons-vue';
 import { ElMessageBox } from 'element-plus';
 import BaseCard from '@/components/ui/BaseCard.vue';
@@ -7,7 +7,7 @@ import BaseDialog from '@/components/ui/BaseDialog.vue';
 import LocalizedField from '@/components/LocalizedField.vue';
 import { config } from '@/config';
 import { state as identity } from '@/store/modules/user';
-import { SecurityPasswordDialog } from '@/plugins/securityPassword';
+import { SecurityPasswordDialog, SecurityPasswordField, securityPasswordRequirement } from '@/plugins/securityPassword';
 import { storageApi } from '@/api/file/storage';
 import { can } from '@/utils/permission';
 import { fail, notify } from '@/utils/feedback';
@@ -18,13 +18,14 @@ import '@styles/file-storage.css';
 const tab = ref('storages'), rows = ref([]), tasks = ref([]), loading = ref(false), busy = ref(false), visible = ref(false), editId = ref(null), errors = ref({});
 const providers = ref([]), localProviders = ref([]);
 const settings = ref({ default_disk: 'public', max_upload_mb: 32, hard_max_upload_mb: 1024, allowed_extensions: [], extension_options: [] });
-const extraExtension = ref(''), source = ref(''), target = ref(''), form = ref({});
+const extraExtension = ref(''), source = ref(''), target = ref(''), form = ref({}), securityPassword = ref('');
 const builtin = computed(() => ['public', 'local'].includes(form.value.disk) && editId.value != null);
 const local = computed(() => localProviders.value.includes(form.value.provider));
 const enabled = computed(() => rows.value.filter(row => row.enabled && row.configured));
 const extensionOptions = computed(() => [...new Set([...settings.value.extension_options, ...settings.value.allowed_extensions])]);
 const securityDialog = ref();
 const securityConfigured = computed(() => identity.user?.security_password_set === true);
+const requiresSecurity = computed(() => !!securityPasswordRequirement(`file.storage.${editId.value ? 'update' : 'create'}`, config.routes));
 let timer, active = true;
 function label(provider) { return t(`file.item.provider_${provider}`); }
 function fieldError(key) { return errors.value[key]?.[0]; }
@@ -57,14 +58,15 @@ function open(row) {
         enabled: false, visibility: 'private', configuration: { directory: '', bucket: '', region: 'auto', endpoint: '', url: '', use_path_style_endpoint: false },
     };
     form.value.access_key = ''; form.value.secret_key = '';
+    securityPassword.value = '';
     errors.value = {}; visible.value = true;
 }
 async function save() {
+    if (busy.value || requiresSecurity.value && !securityConfigured.value) return;
     busy.value = true; errors.value = {};
     try {
         const data = Object.fromEntries(['disk', 'name_i18n', 'provider', 'enabled', 'visibility', 'configuration', 'access_key', 'secret_key'].map(key => [key, form.value[key]]));
-        const result = await securityDialog.value.open((security_password, { signal }) => storageApi[editId.value ? 'update' : 'create']({ id: editId.value, data: { ...data, security_password }, signal }));
-        if (!result.confirmed) return;
+        await storageApi[editId.value ? 'update' : 'create']({ id: editId.value, data: { ...data, ...(requiresSecurity.value ? { security_password: securityPassword.value } : {}) } });
         visible.value = false; notify(t('common.saved')); await load();
     } catch (error) { errors.value = error.fields || {}; if (errors.value['name_i18n.en']) fail(error); }
     finally { busy.value = false; }
@@ -109,10 +111,11 @@ async function retry(task) {
     finally { busy.value = false; }
 }
 function percentage(task) { return task.status === 'completed' ? 100 : Math.min(100, Math.round(100 * (Number(task.copied) + Number(task.skipped) + Number(task.failed)) / Math.max(1, Number(task.total)))); }
+watch(visible, next => { if (!next) securityPassword.value = ''; }, { flush: 'sync' });
 onMounted(load);
 onActivated(() => { active = true; poll(); });
 onDeactivated(() => { active = false; stopPolling(); });
-onBeforeUnmount(() => { active = false; stopPolling(); });
+onBeforeUnmount(() => { active = false; stopPolling(); securityPassword.value = ''; });
 </script>
 
 <template>
@@ -149,16 +152,24 @@ onBeforeUnmount(() => { active = false; stopPolling(); });
     </BaseCard>
     <SecurityPasswordDialog ref="securityDialog" :configured="securityConfigured" :setup-href="config.pages.profile" />
     <BaseDialog v-model="visible" :title="t(editId ? 'common.edit' : 'common.create')" width="76vw" class="file-storage-editor-dialog" :busy="busy">
-        <el-form label-position="right" label-width="128px" class="horizontal-editor-form" :disabled="busy" @submit.prevent="save">
+        <el-form label-position="right" label-width="144px" class="horizontal-editor-form" :disabled="busy" @submit.prevent="save">
             <div class="file-storage-grid"><el-form-item :label="t('file.storage.disk')" :error="fieldError('disk')"><el-input v-model="form.disk" :disabled="editId != null" maxlength="32" /></el-form-item><el-form-item :label="t('file.item.storage_provider')" :error="fieldError('provider')"><el-select v-model="form.provider" :disabled="editId != null"><el-option v-for="provider in [...new Set([...providers,form.provider])]" :key="provider" :value="provider" :label="label(provider)" /></el-select></el-form-item></div>
             <LocalizedField v-model="form.name_i18n" field="name_i18n" :label="t('file.storage.name')" :errors="errors" :maxlength="128" required />
-            <div class="file-storage-grid"><el-form-item :label="t('file.item.visibility')" :error="fieldError('visibility')"><el-radio-group v-model="form.visibility" :disabled="builtin"><el-radio value="private">{{ t('file.item.private') }}</el-radio><el-radio value="public">{{ t('file.item.public') }}</el-radio></el-radio-group></el-form-item><el-form-item :label="t('file.storage.enabled')" :error="fieldError('enabled')"><el-switch v-model="form.enabled" /></el-form-item></div>
+            <div class="file-storage-grid file-storage-choice-grid"><el-form-item :label="t('file.item.visibility')" :error="fieldError('visibility')"><el-radio-group v-model="form.visibility" :disabled="builtin"><el-radio value="private">{{ t('file.item.private') }}</el-radio><el-radio value="public">{{ t('file.item.public') }}</el-radio></el-radio-group></el-form-item><el-form-item :label="t('file.storage.enabled')" :error="fieldError('enabled')"><el-switch v-model="form.enabled" /></el-form-item></div>
             <el-form-item v-if="local" :label="t('file.storage.directory')" :error="fieldError('configuration.directory')"><el-input v-model="form.configuration.directory" :disabled="builtin" maxlength="128"><template #prepend>storage/app/</template></el-input><p class="file-storage-muted">{{ t('file.storage.directory_hint') }}</p></el-form-item>
-            <template v-else><div class="file-storage-grid"><el-form-item :label="t('file.storage.bucket')" :error="fieldError('configuration.bucket')"><el-input v-model="form.configuration.bucket" maxlength="128" /></el-form-item><el-form-item :label="t('file.storage.region')" :error="fieldError('configuration.region')"><el-input v-model="form.configuration.region" maxlength="64" /></el-form-item></div><el-form-item :label="t('file.storage.endpoint')" :error="fieldError('configuration.endpoint')"><el-input v-model="form.configuration.endpoint" maxlength="512" placeholder="https://account-id.r2.cloudflarestorage.com" /></el-form-item><div class="file-storage-grid"><el-form-item label="Access Key ID" :error="fieldError('access_key')"><el-input v-model="form.access_key" type="password" show-password autocomplete="new-password" maxlength="512" :placeholder="form.has_access_key ? t('file.storage.keep_secret') : ''" /></el-form-item><el-form-item label="Secret Access Key" :error="fieldError('secret_key')"><el-input v-model="form.secret_key" type="password" show-password autocomplete="new-password" maxlength="512" :placeholder="form.has_secret_key ? t('file.storage.keep_secret') : ''" /></el-form-item></div><el-checkbox v-model="form.configuration.use_path_style_endpoint">{{ t('file.storage.path_style') }}</el-checkbox></template>
-            <el-form-item :label="t('file.storage.public_url')" :error="fieldError('configuration.url')"><el-input v-model="form.configuration.url" maxlength="512" placeholder="https://assets.example.com" /></el-form-item>
+            <template v-else>
+                <div class="file-storage-grid"><el-form-item :label="t('file.storage.bucket')" :error="fieldError('configuration.bucket')"><el-input v-model="form.configuration.bucket" maxlength="128" /></el-form-item><el-form-item :label="t('file.storage.region')" :error="fieldError('configuration.region')"><el-input v-model="form.configuration.region" maxlength="64" /></el-form-item></div>
+                <el-form-item :label="t('file.storage.endpoint')" :error="fieldError('configuration.endpoint')"><el-input v-model="form.configuration.endpoint" maxlength="512" placeholder="https://account-id.r2.cloudflarestorage.com" /></el-form-item>
+                <div class="file-storage-grid"><el-form-item label="Access Key ID" :error="fieldError('access_key')"><el-input v-model="form.access_key" type="password" show-password autocomplete="new-password" maxlength="512" :placeholder="form.has_access_key ? t('file.storage.keep_secret') : ''" /></el-form-item><el-form-item label="Secret Access Key" :error="fieldError('secret_key')"><el-input v-model="form.secret_key" type="password" show-password autocomplete="new-password" maxlength="512" :placeholder="form.has_secret_key ? t('file.storage.keep_secret') : ''" /></el-form-item></div>
+            </template>
+            <div class="file-storage-grid">
+                <el-form-item :label="t('file.storage.public_url')" :error="fieldError('configuration.url')"><el-input v-model="form.configuration.url" maxlength="512" placeholder="https://assets.example.com" /></el-form-item>
+                <el-form-item v-if="!local" :label="t('file.storage.path_style')" class="file-storage-checkbox-item"><el-checkbox v-model="form.configuration.use_path_style_endpoint" :aria-label="t('file.storage.path_style')" /></el-form-item>
+            </div>
             <el-alert v-if="form.provider === 'cloudflare'" :title="t('file.storage.r2_hint')" type="info" :closable="false" />
             <p v-if="fieldError('configuration')" class="file-storage-error">{{ fieldError('configuration') }}</p>
+            <SecurityPasswordField v-if="requiresSecurity" v-model="securityPassword" :configured="securityConfigured" :setup-href="config.pages.profile" :errors="errors" :disabled="busy" />
         </el-form>
-        <template #footer><el-button :disabled="busy" @click="visible = false">{{ t('common.cancel') }}</el-button><el-button type="primary" :loading="busy" @click="save">{{ t('common.save') }}</el-button></template>
+        <template #footer><el-button :disabled="busy" @click="visible = false">{{ t('common.cancel') }}</el-button><el-button type="primary" :loading="busy" :disabled="requiresSecurity && !securityConfigured" @click="save">{{ t('common.save') }}</el-button></template>
     </BaseDialog>
 </template>

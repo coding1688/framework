@@ -22,6 +22,8 @@
   "bullet_list": "箇条書き",
   "ordered_list": "番号付きリスト",
   "blockquote": "引用",
+  "code": "インラインコード",
+  "code_block": "コードブロック",
   "link": "リンクを挿入・編集",
   "unlink": "リンクを削除",
   "clear_format": "書式をクリア",

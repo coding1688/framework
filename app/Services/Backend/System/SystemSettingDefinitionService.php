@@ -27,7 +27,9 @@ class SystemSettingDefinitionService extends BaseService
 
         return [...$this->groups->options(), 'input_types' => $this->fields->metadata(), 'option_source_types' => $this->fields->optionSources()->types(),
             'option_sources' => $this->fields->optionSources()->sources($this->optionContext()),
-            'option_source_categories' => $this->fields->optionSources()->categories($this->optionContext())];
+            'option_source_categories' => $this->fields->optionSources()->categories($this->optionContext()),
+            'dependency_definitions' => SystemSettingDefinition::query()->where('secret', false)->orderBy('key')->get()
+                ->map(fn (SystemSettingDefinition $definition): array => ['id' => $definition->id, 'group_id' => $definition->group_id, 'key' => $definition->key, 'name' => $definition->name])->values()->all()];
     }
 
     public function optionValues(array $validated): array
@@ -74,6 +76,7 @@ class SystemSettingDefinitionService extends BaseService
         $this->guard('create');
         $validated = $this->settingFields->prepare($validated);
         $model = DB::transaction(function () use ($validated): SystemSettingDefinition {
+            $this->validateDependency($validated);
             $model = SystemSettingDefinition::create($validated);
             Audit::record('development.setting.create', (string) $model->id);
 
@@ -94,6 +97,11 @@ class SystemSettingDefinitionService extends BaseService
             if ($value !== null && $model->secret && ! $validated['secret']) {
                 throw ValidationException::withMessages(['secret' => __('backend/system/settings.secret_downgrade')]);
             }
+            $hasDependents = SystemSettingDefinition::where('depends_on', $model->key)->exists();
+            if ($hasDependents && ($model->key !== $validated['key'] || (int) $model->group_id !== (int) $validated['group_id'])) {
+                throw ValidationException::withMessages(['key' => __('backend/common.in_use')]);
+            }
+            $this->validateDependency($validated, $model);
             $candidate = new SystemSettingDefinition($validated);
             if ($value !== null) {
                 $this->settingFields->filter($candidate, $value->payload, 'validation');
@@ -109,13 +117,42 @@ class SystemSettingDefinitionService extends BaseService
         $this->guard('delete');
         DB::transaction(function () use ($id): void {
             $model = SystemSettingDefinition::lockForUpdate()->findOrFail($id);
-            if ($model->value()->exists()) {
+            if ($model->value()->exists() || SystemSettingDefinition::where('depends_on', $model->key)->exists()) {
                 throw ValidationException::withMessages(['id' => __('backend/common.in_use')]);
             }
             $model->delete();
             Audit::record('development.setting.delete', (string) $id);
         });
         $this->settings->forget();
+    }
+
+    /** @param array<string, mixed> $validated */
+    private function validateDependency(array $validated, ?SystemSettingDefinition $model = null): void
+    {
+        $dependsOn = $validated['depends_on'] ?? null;
+        if ($dependsOn === null) {
+            if (($validated['depends_value'] ?? null) !== null) {
+                throw ValidationException::withMessages(['depends_on' => __('backend/common.invalid')]);
+            }
+
+            return;
+        }
+        $definitions = SystemSettingDefinition::where('group_id', $validated['group_id'])->get()->keyBy('key');
+        $dependency = $definitions->get($dependsOn);
+        if ($dependency === null || $dependency->secret) {
+            throw ValidationException::withMessages(['depends_on' => __('backend/common.invalid')]);
+        }
+        $seen = [];
+        foreach (array_filter([$validated['key'], $model?->key]) as $key) {
+            $seen[$key] = true;
+        }
+        while ($dependsOn !== null) {
+            if (isset($seen[$dependsOn])) {
+                throw ValidationException::withMessages(['depends_on' => __('backend/common.cycle')]);
+            }
+            $seen[$dependsOn] = true;
+            $dependsOn = $definitions->get($dependsOn)?->depends_on;
+        }
     }
 
     private function guard(string $action): void

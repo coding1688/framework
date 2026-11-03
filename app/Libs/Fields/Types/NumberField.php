@@ -28,6 +28,11 @@ final class NumberField implements FieldType
         return false;
     }
 
+    public function required(bool $multiple, array $validation): bool
+    {
+        return true;
+    }
+
     public function usesOptions(bool $multiple): bool
     {
         return false;

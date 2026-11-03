@@ -12,6 +12,7 @@ use App\Models\Common\FileStorageAccount;
 use Database\Seeders\backend\file\FileStorageSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
@@ -130,6 +131,24 @@ class UploadConfigurationTest extends TestCase
         $this->assertSame([], app(UploadConfiguration::class)->enabledDisks());
         $this->assertSame(7, FileStorageAccount::count());
         $this->assertSame(1024, app(UploadConfiguration::class)->defaults()['limits']['hard_max_upload_mb']);
+    }
+
+    public function test_storage_configuration_cache_and_disk_instances_are_reused_and_writes_invalidate_them(): void
+    {
+        $this->seed(FileStorageSeeder::class);
+        $storages = app(StorageRegistry::class);
+        $storages->forget();
+        DB::enableQueryLog();
+        DB::flushQueryLog();
+        $storages->uploadSettings();
+        $queries = count(DB::getQueryLog());
+        $storages->uploadSettings();
+        $this->assertSame($queries, count(DB::getQueryLog()));
+        DB::disableQueryLog();
+
+        $this->assertSame($storages->disk('public'), $storages->disk('public'));
+        FileConfiguration::find(1)->update(['max_upload_mb' => 64]);
+        $this->assertSame(64, $storages->uploadSettings()['max_upload_mb']);
     }
 
     private function setValue(string $key, array $payload): void

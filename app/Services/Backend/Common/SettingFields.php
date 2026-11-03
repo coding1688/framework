@@ -23,7 +23,7 @@ class SettingFields
         } catch (InvalidArgumentException) {
             throw ValidationException::withMessages(['validation' => __('backend/common.invalid')]);
         }
-        if (in_array($validated['key'], ['ai.openai.api_key', 'mail.smtp.password'], true) && ! $validated['secret']) {
+        if ((preg_match('/^ai\.[a-z][a-z0-9_-]{0,63}\.api_key$/D', $validated['key']) || $validated['key'] === 'mail.smtp.password') && ! $validated['secret']) {
             throw ValidationException::withMessages(['secret' => __('backend/system/settings.secret_rule')]);
         }
         if ($validated['secret'] && ($validated['input_type'] !== 'text' || $validated['multiple'] || ! empty($validated['default_value']))) {

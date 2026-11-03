@@ -43,5 +43,8 @@
   "all_groups": "กลุ่มทั้งหมด",
   "key_suffix_placeholder": "ตัวอย่าง: title",
   "key_suffix_required": "ป้อนคีย์ต่อจากคำนำหน้ากลุ่ม",
-  "key_length_invalid": "คีย์ทั้งหมดต้องยาวไม่เกิน 128 ตัวอักษร"
+  "key_length_invalid": "คีย์ทั้งหมดต้องยาวไม่เกิน 128 ตัวอักษร",
+  "depends_on": "ฟิลด์ที่ต้องพึ่งพา",
+  "depends_value": "ค่าที่ต้องพึ่งพา",
+  "depends_value_placeholder": "เว้นว่างเพื่อยอมรับค่าที่ไม่ว่างใด ๆ"
 }

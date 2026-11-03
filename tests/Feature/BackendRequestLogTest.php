@@ -60,7 +60,7 @@ class BackendRequestLogTest extends TestCase
         Route::middleware(['web', BackendLogMid::class])
             ->get('/test-ignore-log', [IgnoredLogController::class, 'ignored']);
         Log::shouldReceive('channel')->never();
-        $this->getJson('/test-ignore-log')->assertOk();
+        $this->getJson('http://a.base.local/test-ignore-log')->assertOk();
         $this->assertDatabaseHas('admin_logs', ['action' => 'test.explicit.audit']);
     }
 }

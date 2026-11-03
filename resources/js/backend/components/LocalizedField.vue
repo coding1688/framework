@@ -12,7 +12,7 @@ function change(locale, value) { emit('update:modelValue', { ...props.modelValue
     <el-form-item :label="label" :required="required" :error="errors?.[`${field}.${active}`]?.[0] || errors?.[field]?.[0]" class="translation-field">
         <el-tabs v-model="active" type="card">
             <el-tab-pane v-for="[locale, localeLabel] in locales" :key="locale" :name="locale">
-                <template #label><span>{{ localeLabel }}</span><span v-if="requiredLocales?.includes(locale) || (required && !requiredLocales && locale === 'en')" class="translation-required">*</span></template>
+                <template #label><span>{{ localeLabel }}</span><span v-if="required && (requiredLocales?.includes(locale) || (!requiredLocales && locale === 'en'))" class="translation-required">*</span></template>
                 <RichTextEditor v-if="type==='rich' && active === locale" :model-value="modelValue?.[locale]||''" :placeholder="placeholder||localeLabel" @update:model-value="value=>change(locale,value)" />
                 <el-input v-else-if="type!=='rich'" :type="type==='textarea'?'textarea':'text'" :rows="type==='textarea'?3:undefined" :model-value="modelValue?.[locale]||''" :maxlength="maxlength" show-word-limit :placeholder="placeholder||localeLabel" @update:model-value="value=>change(locale,value)" />
             </el-tab-pane>

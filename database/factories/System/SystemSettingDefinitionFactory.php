@@ -9,7 +9,7 @@ class SystemSettingDefinitionFactory extends Factory
 {
     public function definition(): array
     {
-        return ['group_id' => SystemSettingGroup::factory(), 'key' => 'test.setting'.fake()->unique()->numerify('########'), 'name_i18n' => ['en' => fake()->words(2, true)], 'input_type' => 'text', 'multiple' => false, 'option_source_type' => 'manual', 'option_source_key' => null, 'validation' => ['min_length' => 0, 'max_length' => 128], 'default_value' => ['value_string' => 'default'], 'secret' => false, 'active' => true, 'sort' => 0];
+        return ['group_id' => SystemSettingGroup::factory(), 'key' => 'test.setting'.fake()->unique()->numerify('########'), 'name_i18n' => ['en' => fake()->words(2, true)], 'input_type' => 'text', 'multiple' => false, 'option_source_type' => 'manual', 'option_source_key' => null, 'depends_on' => null, 'depends_value' => null, 'validation' => ['min_length' => 0, 'max_length' => 128], 'default_value' => ['value_string' => 'default'], 'secret' => false, 'active' => true, 'sort' => 0];
     }
 
     public function secret(): static
