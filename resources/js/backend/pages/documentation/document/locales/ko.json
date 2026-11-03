@@ -1,0 +1,14 @@
+{
+  "search_placeholder": "문서 제목 또는 슬러그 검색",
+  "title": "문서 제목",
+  "slug": "슬러그",
+  "type": "문서 유형",
+  "development": "개발 문서",
+  "usage": "사용 가이드",
+  "category": "분류",
+  "select_category": "분류 선택",
+  "summary": "요약",
+  "content": "본문",
+  "published_at": "게시일",
+  "preview": "미리보기"
+}

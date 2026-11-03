@@ -1,0 +1,14 @@
+{
+  "search_placeholder": "搜索文档标题或标识",
+  "title": "文档标题",
+  "slug": "唯一标识",
+  "type": "文档类型",
+  "development": "开发文档",
+  "usage": "使用文档",
+  "category": "所属分类",
+  "select_category": "请选择分类",
+  "summary": "文档摘要",
+  "content": "文档正文",
+  "published_at": "发布时间",
+  "preview": "预览"
+}

@@ -1,0 +1,14 @@
+{
+  "search_placeholder": "搜尋文件標題或識別碼",
+  "title": "文件標題",
+  "slug": "唯一識別碼",
+  "type": "文件類型",
+  "development": "開發文件",
+  "usage": "使用文件",
+  "category": "所屬分類",
+  "select_category": "請選擇分類",
+  "summary": "文件摘要",
+  "content": "文件內容",
+  "published_at": "發佈時間",
+  "preview": "預覽"
+}

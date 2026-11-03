@@ -1,0 +1,11 @@
+{
+  "search_placeholder": "搜尋分類名稱或識別碼",
+  "name": "分類名稱",
+  "slug": "唯一識別碼",
+  "type": "文件類型",
+  "development": "開發文件",
+  "usage": "使用文件",
+  "description": "分類說明",
+  "parent": "上層分類",
+  "create_child": "新增子分類"
+}

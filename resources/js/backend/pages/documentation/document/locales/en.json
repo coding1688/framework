@@ -1,0 +1,14 @@
+{
+  "search_placeholder": "Search document title or slug",
+  "title": "Document title",
+  "slug": "Slug",
+  "type": "Document type",
+  "development": "Development",
+  "usage": "User guides",
+  "category": "Category",
+  "select_category": "Select a category",
+  "summary": "Summary",
+  "content": "Content",
+  "published_at": "Published at",
+  "preview": "Preview"
+}

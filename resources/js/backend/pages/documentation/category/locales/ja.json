@@ -1,0 +1,11 @@
+{
+  "search_placeholder": "分類名またはスラッグを検索",
+  "name": "分類名",
+  "slug": "スラッグ",
+  "type": "ドキュメント種別",
+  "development": "開発ドキュメント",
+  "usage": "使用ガイド",
+  "description": "説明",
+  "parent": "親分類",
+  "create_child": "子分類を追加"
+}

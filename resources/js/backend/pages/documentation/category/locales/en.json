@@ -1,0 +1,11 @@
+{
+  "search_placeholder": "Search category name or slug",
+  "name": "Category name",
+  "slug": "Slug",
+  "type": "Document type",
+  "development": "Development",
+  "usage": "User guides",
+  "description": "Description",
+  "parent": "Parent category",
+  "create_child": "Add child"
+}
